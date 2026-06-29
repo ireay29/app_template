@@ -1,4 +1,10 @@
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import MuiButton from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
+import { ExternalLink, PlayCircle, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getHealth, type HealthResponse } from './lib/api';
 
 type LoadState =
@@ -29,89 +35,116 @@ export function App() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-zinc-50 text-zinc-950">
-      <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-6 py-12">
-        <div className="mb-8 max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
+    <main className="bg-background text-foreground min-h-screen">
+      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-6 py-12">
+        <div className="mb-8 max-w-3xl">
+          <p className="text-sm font-semibold tracking-wide text-teal-700 uppercase">
             TypeScript workspace
           </p>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight text-zinc-950 sm:text-5xl">
+          <h1 className="mt-3 text-4xl leading-tight font-semibold text-zinc-950 sm:text-5xl">
             Vite React frontend with a Hono API.
           </h1>
-          <p className="mt-5 text-base leading-7 text-zinc-600">
-            A small production-leaning template with Tailwind CSS, OpenAPI, linting, formatting, and
-            tests already wired together.
+          <p className="mt-5 text-base leading-7 text-zinc-600 md:text-lg">
+            A compact workspace with Tailwind CSS, OpenAPI, design-system examples, and verification
+            commands already wired together.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
-          <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold">API status</h2>
-                <p className="mt-1 text-sm text-zinc-500">Read through the Vite dev proxy.</p>
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+          <Card>
+            <CardHeader className="flex-row items-start justify-between gap-4">
+              <div className="space-y-1.5">
+                <CardTitle>API status</CardTitle>
+                <CardDescription>Read through the Vite dev proxy.</CardDescription>
               </div>
-              <StatusBadge state={state.status} />
-            </div>
+              <StatusChip state={state.status} />
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md bg-zinc-950 p-4 font-mono text-sm text-zinc-50">
+                <span className="sr-only">API health response</span>
+                {state.status === 'loading' && <span>Checking /api/health...</span>}
+                {state.status === 'error' && <span>{state.message}</span>}
+                {state.status === 'ready' && (
+                  <pre className="overflow-x-auto">
+                    {JSON.stringify(
+                      {
+                        status: state.data.status,
+                        service: state.data.service,
+                        uptime: Number(state.data.uptime.toFixed(2)),
+                      },
+                      null,
+                      2,
+                    )}
+                  </pre>
+                )}
+              </div>
 
-            <div className="mt-6 rounded-md bg-zinc-950 p-4 font-mono text-sm text-zinc-50">
-              {state.status === 'loading' && <span>Checking /api/health...</span>}
-              {state.status === 'error' && <span>{state.message}</span>}
-              {state.status === 'ready' && (
-                <pre className="overflow-x-auto">
-                  {JSON.stringify(
-                    {
-                      status: state.data.status,
-                      service: state.data.service,
-                      uptime: Number(state.data.uptime.toFixed(2)),
-                    },
-                    null,
-                    2,
-                  )}
-                </pre>
-              )}
-            </div>
-          </section>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button asChild>
+                  <a href="/api/docs" rel="noreferrer" target="_blank">
+                    <ExternalLink aria-hidden="true" />
+                    API docs
+                  </a>
+                </Button>
+                <Button asChild variant="outline">
+                  <a href="/api/openapi.json" rel="noreferrer" target="_blank">
+                    OpenAPI JSON
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-          <aside className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold">Local links</h2>
-            <div className="mt-4 grid gap-3">
-              <a
-                className="rounded-md border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-800 transition hover:border-teal-300 hover:bg-teal-50"
-                href="/api/docs"
-                rel="noreferrer"
-                target="_blank"
-              >
-                API docs
-              </a>
-              <a
-                className="rounded-md border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-800 transition hover:border-teal-300 hover:bg-teal-50"
-                href="/api/openapi.json"
-                rel="noreferrer"
-                target="_blank"
-              >
-                OpenAPI JSON
-              </a>
-            </div>
-          </aside>
+          <Card>
+            <CardHeader>
+              <CardTitle>Design systems</CardTitle>
+              <CardDescription>
+                Material UI and shadcn/ui components are ready to use.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-muted/40 rounded-md border p-4">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <ShieldCheck className="size-4 text-teal-700" aria-hidden="true" />
+                  shadcn/ui
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button size="sm">
+                    <PlayCircle aria-hidden="true" />
+                    Primary
+                  </Button>
+                  <Button size="sm" variant="secondary">
+                    Secondary
+                  </Button>
+                </div>
+              </div>
+
+              <div className="rounded-md border bg-white p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium">Material UI</span>
+                  <Chip color="primary" label="ready" size="small" variant="outlined" />
+                </div>
+                <MuiButton
+                  component="a"
+                  endIcon={<OpenInNewRoundedIcon fontSize="small" />}
+                  href="/api/health"
+                  size="small"
+                  variant="contained"
+                >
+                  Check health
+                </MuiButton>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </main>
   );
 }
 
-function StatusBadge({ state }: { state: LoadState['status'] }) {
+function StatusChip({ state }: { state: LoadState['status'] }) {
   const label = state === 'ready' ? 'API online' : state === 'error' ? 'API offline' : 'Checking';
-  const className =
-    state === 'ready'
-      ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-      : state === 'error'
-        ? 'bg-red-50 text-red-700 ring-red-200'
-        : 'bg-zinc-100 text-zinc-700 ring-zinc-200';
+  const color = state === 'ready' ? 'success' : state === 'error' ? 'error' : 'default';
 
-  return (
-    <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${className}`}>
-      {label}
-    </span>
-  );
+  return <Chip color={color} label={label} size="small" variant="outlined" />;
 }
