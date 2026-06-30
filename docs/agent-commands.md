@@ -8,7 +8,8 @@ This template keeps a small set of predictable commands for coding agents and hu
 pnpm agent:quick
 ```
 
-Runs formatting check, ESLint, TypeScript, and unit tests.
+Starts PostgreSQL through Docker Compose, waits for readiness, runs migrations,
+then runs formatting check, ESLint, TypeScript, and unit tests.
 
 ## Full Verification
 
@@ -16,7 +17,9 @@ Runs formatting check, ESLint, TypeScript, and unit tests.
 pnpm agent:verify
 ```
 
-Runs the same checks used by CI, including coverage, production build, and Playwright E2E.
+Starts PostgreSQL through Docker Compose, waits for readiness, runs migrations,
+then runs the same checks used by CI, including coverage, production build, and
+Playwright E2E.
 
 ## Fixes
 

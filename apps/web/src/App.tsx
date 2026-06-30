@@ -3,8 +3,11 @@ import MuiButton from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import { ExternalLink, PlayCircle, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AuthNotesDemo } from '@/features/auth/AuthNotesDemo';
+
 import { getHealth, type HealthResponse } from './lib/api';
 
 type LoadState =
@@ -70,6 +73,7 @@ export function App() {
                       {
                         status: state.data.status,
                         service: state.data.service,
+                        database: state.data.database,
                         uptime: Number(state.data.uptime.toFixed(2)),
                       },
                       null,
@@ -136,6 +140,10 @@ export function App() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="mt-4">
+          <AuthNotesDemo />
         </div>
       </section>
     </main>

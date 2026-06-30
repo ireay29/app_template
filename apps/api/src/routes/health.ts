@@ -10,6 +10,9 @@ const healthResponseSchema = z.object({
   uptime: z.number().openapi({
     example: 12.34,
   }),
+  database: z.enum(['ok', 'unavailable']).openapi({
+    example: 'ok',
+  }),
 });
 
 export const healthRoute = createRoute({

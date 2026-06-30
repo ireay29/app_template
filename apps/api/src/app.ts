@@ -1,52 +1,38 @@
-import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { timing } from 'hono/timing';
-import { greetingRoute } from './routes/greeting.js';
-import { healthRoute } from './routes/health.js';
 
-export function createApp() {
-  const app = new OpenAPIHono();
+import { type AppDependencies, createDefaultAppDependencies } from './app-dependencies.js';
+import {
+  registerAuthRoutes,
+  registerNotesRoutes,
+  registerOpenApiDocs,
+  registerSystemRoutes,
+} from './app-routes.js';
+import { webOrigins } from './config/env.js';
+import { sessionContext } from './middleware/session.js';
+import type { AppEnv } from './types.js';
+
+export function createApp(dependencies: AppDependencies = createDefaultAppDependencies()) {
+  const app = new OpenAPIHono<AppEnv>();
 
   app.use('*', timing());
   app.use(
     '/api/*',
     cors({
-      origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+      origin: webOrigins,
+      credentials: true,
     }),
   );
 
-  app.openapi(healthRoute, (c) => {
-    return c.json({
-      status: 'ok',
-      service: 'api',
-      uptime: process.uptime(),
-    });
-  });
+  app.use('/api/me', sessionContext);
+  app.use('/api/notes', sessionContext);
+  app.use('/api/notes/*', sessionContext);
 
-  app.openapi(greetingRoute, (c) => {
-    const query = c.req.valid('query');
-    const name = query.name ?? 'friend';
-
-    return c.json({
-      message: `Hello, ${name}.`,
-    });
-  });
-
-  app.doc('/api/openapi.json', {
-    openapi: '3.0.3',
-    info: {
-      title: 'App Template API',
-      version: '0.1.0',
-    },
-  });
-
-  app.get(
-    '/api/docs',
-    swaggerUI({
-      url: '/api/openapi.json',
-    }),
-  );
+  registerAuthRoutes(app, dependencies);
+  registerSystemRoutes(app, dependencies);
+  registerNotesRoutes(app, dependencies);
+  registerOpenApiDocs(app);
 
   app.notFound((c) => {
     return c.json(

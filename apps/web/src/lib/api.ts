@@ -2,6 +2,7 @@ export type HealthResponse = {
   status: 'ok';
   service: string;
   uptime: number;
+  database: 'ok' | 'unavailable';
 };
 
 export async function getHealth(signal?: AbortSignal): Promise<HealthResponse> {

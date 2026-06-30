@@ -16,6 +16,25 @@ jobs:
         node-version:
           - 22.x
           - 24.x
+    services:
+      postgres:
+        image: postgres:17-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: app_template
+          POSTGRES_USER: app_template
+          POSTGRES_PASSWORD: app_template
+        options: >-
+          --health-cmd "pg_isready -U app_template -d app_template"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgres://app_template:app_template@localhost:5432/app_template
+      BETTER_AUTH_SECRET: ci-secret-change-me-32-characters-minimum
+      BETTER_AUTH_URL: http://localhost:3000
+      WEB_ORIGIN: http://localhost:3000
 
     steps:
       - name: Checkout
@@ -34,6 +53,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Prepare database
+        run: pnpm db:wait && pnpm db:migrate
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
