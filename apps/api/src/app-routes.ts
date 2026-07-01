@@ -2,8 +2,14 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 import type { AppDependencies } from './app-dependencies.js';
-import { toMeResponse, toNoteResponse, unauthorizedBody } from './http/presenters.js';
+import {
+  forbiddenBody,
+  toMeResponse,
+  toNoteResponse,
+  unauthorizedBody,
+} from './http/presenters.js';
 import { requireAuth } from './middleware/session.js';
+import { adminSummaryRoute } from './routes/admin.js';
 import { greetingRoute } from './routes/greeting.js';
 import { healthRoute } from './routes/health.js';
 import { meRoute } from './routes/me.js';
@@ -49,14 +55,40 @@ export function registerSystemRoutes(app: AppInstance, dependencies: AppDependen
 export function registerAuthRoutes(app: AppInstance, dependencies: AppDependencies) {
   app.all('/api/auth/*', (c) => dependencies.handleAuth(c.req.raw));
 
-  app.openapi(meRoute, (c) => {
+  app.openapi(meRoute, async (c) => {
     const authSession = requireAuth(c);
 
     if (!authSession) {
       return c.json(unauthorizedBody, 401);
     }
 
-    return c.json(toMeResponse(authSession), 200);
+    const currentUser = await dependencies.usersService.requireById(authSession.user.id);
+
+    return c.json(toMeResponse(authSession, currentUser.role), 200);
+  });
+}
+
+export function registerAdminRoutes(app: AppInstance, dependencies: AppDependencies) {
+  app.openapi(adminSummaryRoute, async (c) => {
+    const authSession = requireAuth(c);
+
+    if (!authSession) {
+      return c.json(unauthorizedBody, 401);
+    }
+
+    const currentUser = await dependencies.usersService.requireById(authSession.user.id);
+
+    if (currentUser.role !== 'admin') {
+      return c.json(forbiddenBody, 403);
+    }
+
+    return c.json(
+      {
+        message: 'Admin API access granted.',
+        role: currentUser.role,
+      },
+      200,
+    );
   });
 }
 

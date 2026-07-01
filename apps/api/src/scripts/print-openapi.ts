@@ -16,6 +16,17 @@ const schemaOnlyDependencies: AppDependencies = {
       return [];
     },
   },
+  usersService: {
+    async findByEmail() {
+      return null;
+    },
+    async requireById() {
+      throw new Error('The OpenAPI schema export must not load user records.');
+    },
+    async updateRoleByEmail() {
+      return;
+    },
+  },
 };
 
 const app = createApp(schemaOnlyDependencies);

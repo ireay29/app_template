@@ -23,6 +23,8 @@ quickly.
 | Auth demo UI        | `apps/web/src/features/auth/AuthNotesDemo.tsx`             | Presentation for sign-up, sign-in, sign-out, and note creation.    |
 | Auth demo state     | `apps/web/src/features/auth/useAuthNotesDemo.ts`           | Session, form, feedback orchestration, and note side effects.      |
 | Auth demo support   | `apps/web/src/features/auth/auth-notes-demo-*.ts`          | Demo form schemas, query keys, submit state, and messages.         |
+| Protected route     | `apps/web/src/features/auth/ProtectedRoute.tsx`            | Standard authenticated page guard for React Router routes.         |
+| Admin page          | `apps/web/src/pages/admin/AdminPage.tsx`                   | Protected page and admin-only API example.                         |
 | Web API clients     | `apps/web/src/lib/api.ts`, `apps/web/src/lib/notes-api.ts` | Fetch wrappers for health and authenticated notes.                 |
 | Web fetch helpers   | `apps/web/src/lib/fetch-json.ts`                           | Shared JSON fetch and API error handling for hand-written clients. |
 | Generated API types | `apps/web/src/generated/openapi.ts`                        | Generated from the Hono OpenAPI document; do not edit by hand.     |
@@ -35,9 +37,11 @@ quickly.
 | Auth server         | `apps/api/src/auth/auth.ts`                                | Better Auth with the Drizzle adapter.                              |
 | Session middleware  | `apps/api/src/middleware/session.ts`                       | Loads the Better Auth session into Hono context.                   |
 | Notes domain        | `apps/api/src/notes`                                       | Notes service and repository boundary.                             |
+| Users domain        | `apps/api/src/users`                                       | User lookup and role updates for authz and seed scripts.           |
 | API presenters      | `apps/api/src/http/presenters.ts`                          | Converts domain/session records into API response shapes.          |
 | Database schema     | `apps/api/src/db/schema`                                   | Better Auth tables and the `notes` table.                          |
 | Migrations          | `apps/api/drizzle`                                         | Initial Drizzle migration and metadata.                            |
+| Seed data           | `apps/api/src/scripts/seed.ts`                             | Local admin/member user creation; refuses production execution.    |
 
 ## Runtime Flow
 
@@ -46,7 +50,8 @@ quickly.
 3. Better Auth is mounted at `/api/auth/*`.
 4. Protected routes use `sessionContext` and return `401` when no session is
    present.
-5. Authenticated notes are stored in PostgreSQL through Drizzle ORM.
+5. Admin-only routes return `403` unless the current user has the `admin` role.
+6. Authenticated notes are stored in PostgreSQL through Drizzle ORM.
 
 ## Local Setup
 
@@ -64,6 +69,16 @@ the API and web app. Open the first screen at `http://localhost:3000`.
 
 Docker is required for the local PostgreSQL service. If a `POSTGRES_*` value in
 `.env` is changed, keep `DATABASE_URL` in sync.
+
+To create the default local users after migrations, run:
+
+```sh
+pnpm db:seed
+```
+
+The default seed users are `admin@example.com` and `member@example.com`, both
+using `password1234`. Override them with the `SEED_*` variables documented in
+`.env.example`.
 
 ## Verification
 
@@ -84,6 +99,8 @@ path, including coverage, production builds, and Playwright E2E.
   in `apps/api/src/app-routes.ts`.
 - Run `pnpm openapi:generate` after changing API route schemas and commit the
   updated `apps/web/src/generated/openapi.ts` file.
+- Keep role checks on the API side even when the UI also hides admin-only
+  controls.
 - Keep DB access behind a repository or service boundary instead of placing
   queries directly in `app.ts`.
 - Add new database tables under `apps/api/src/db/schema`, export them from
@@ -98,6 +115,7 @@ path, including coverage, production builds, and Playwright E2E.
 
 - The template uses email/password auth only.
 - The local database is PostgreSQL through Docker Compose.
+- Authorization starts with two roles: `admin` and `member`.
 - API tests and E2E tests require a migrated database.
 - The demo notes feature is intentionally small and exists to prove the auth,
   DB, API, and web integration path.

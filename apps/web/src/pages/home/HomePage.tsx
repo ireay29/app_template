@@ -1,3 +1,7 @@
+import { ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+import { Button } from '@/components/ui/button';
 import { AuthNotesDemo } from '@/features/auth/AuthNotesDemo';
 import { DesignSystemCard } from '@/features/design-system/DesignSystemCard';
 import { ApiStatusCard } from '@/features/health/ApiStatusCard';
@@ -17,6 +21,14 @@ export function HomePage() {
             A compact workspace with Tailwind CSS, OpenAPI, design-system examples, and verification
             commands already wired together.
           </p>
+          <div className="mt-5">
+            <Button asChild variant="outline">
+              <Link to="/admin">
+                <ShieldCheck aria-hidden="true" />
+                Admin area
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">

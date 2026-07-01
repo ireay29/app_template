@@ -1,6 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
 
 import { ErrorState } from '@/components/ui/feedback-state';
+import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
+import { AdminPage } from '@/pages/admin/AdminPage';
 import { HomePage } from '@/pages/home/HomePage';
 
 export const router = createBrowserRouter([
@@ -15,5 +17,13 @@ export const router = createBrowserRouter([
       </main>
     ),
     path: '/',
+  },
+  {
+    element: (
+      <ProtectedRoute>
+        <AdminPage />
+      </ProtectedRoute>
+    ),
+    path: '/admin',
   },
 ]);

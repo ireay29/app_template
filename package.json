@@ -19,6 +19,7 @@
     "db:wait": "pnpm --filter @app-template/api db:wait",
     "db:generate": "pnpm --filter @app-template/api db:generate",
     "db:migrate": "pnpm --filter @app-template/api db:migrate",
+    "db:seed": "pnpm --filter @app-template/api db:seed",
     "db:studio": "pnpm --filter @app-template/api db:studio",
     "db:reset": "sh ./scripts/compose.sh down -v && pnpm db:up && pnpm db:wait && pnpm db:migrate",
     "openapi:schema": "pnpm --filter @app-template/api openapi:schema",

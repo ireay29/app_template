@@ -167,15 +167,15 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 - Form/validation: React Hook Form + Zod
 - Common UI: `apps/web/src/components` 配下に loading、empty、error、unauthorized、toast、dialog を用意する
 - Auth/Authz: protected page、protected API、`admin` / `member` role を標準化する
-- Seed: admin user と member user を1件ずつ用意する
+- Seed: `admin@example.com` と `member@example.com` を1件ずつ用意し、初期passwordはlocal用に `password1234` とする
 - API client: `openapi-typescript`、`openapi-fetch`、`openapi-react-query` による OpenAPI 生成へ寄せる
+- OpenAPI command: `pnpm openapi:generate` で生成し、`pnpm openapi:check` をCI差分検知に使う
 - Storybook: 導入しない
 
 ## 次に決めること
 
-- OpenAPI 生成コマンド名と CI での差分検知方法。
 - 共通 UI primitive の最小セット。
-- seed data に含める demo user の email/password と demo notes の具体値。
+- seed data に demo notes を含めるかどうか。
 
 ## 後回しにすること
 

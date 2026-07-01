@@ -4,6 +4,7 @@ import { timing } from 'hono/timing';
 
 import { type AppDependencies, createDefaultAppDependencies } from './app-dependencies.js';
 import {
+  registerAdminRoutes,
   registerAuthRoutes,
   registerNotesRoutes,
   registerOpenApiDocs,
@@ -26,10 +27,12 @@ export function createApp(dependencies: AppDependencies = createDefaultAppDepend
   );
 
   app.use('/api/me', sessionContext);
+  app.use('/api/admin/*', sessionContext);
   app.use('/api/notes', sessionContext);
   app.use('/api/notes/*', sessionContext);
 
   registerAuthRoutes(app, dependencies);
+  registerAdminRoutes(app, dependencies);
   registerSystemRoutes(app, dependencies);
   registerNotesRoutes(app, dependencies);
   registerOpenApiDocs(app);

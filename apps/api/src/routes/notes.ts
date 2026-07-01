@@ -1,6 +1,6 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
-import { unauthorizedResponseSchema } from './me.js';
+import { unauthorizedResponseSchema } from './auth-responses.js';
 
 export const noteSchema = z.object({
   id: z.string().uuid().openapi({ example: '01234567-89ab-cdef-0123-456789abcdef' }),

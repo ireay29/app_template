@@ -39,6 +39,11 @@ export interface paths {
                 name: string;
                 /** @example null */
                 image: string | null;
+                /**
+                 * @example member
+                 * @enum {string}
+                 */
+                role: 'admin' | 'member';
               };
               session: {
                 /** @example session_123 */
@@ -64,6 +69,79 @@ export interface paths {
                * @enum {string}
                */
               error: 'Unauthorized';
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Returns an admin-only API example response. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @example Admin API access granted. */
+              message: string;
+              /**
+               * @example admin
+               * @enum {string}
+               */
+              role: 'admin';
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * @example Unauthorized
+               * @enum {string}
+               */
+              error: 'Unauthorized';
+            };
+          };
+        };
+        /** @description The current user does not have the required role. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * @example Forbidden
+               * @enum {string}
+               */
+              error: 'Forbidden';
             };
           };
         };

@@ -9,6 +9,7 @@
     "start": "node dist/index.js",
     "db:generate": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp drizzle-kit generate",
     "db:migrate": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp drizzle-kit migrate",
+    "db:seed": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp tsx src/scripts/seed.ts",
     "db:studio": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp drizzle-kit studio",
     "db:wait": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp tsx src/scripts/wait-for-db.ts",
     "openapi:schema": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp tsx src/scripts/print-openapi.ts",

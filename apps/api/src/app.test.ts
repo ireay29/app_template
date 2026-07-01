@@ -2,6 +2,9 @@ import { afterAll, describe, expect, it } from 'vitest';
 
 import { app } from './app.js';
 import { closeDatabase } from './db/client.js';
+import { createUsersService } from './users/users-service.js';
+
+const usersService = createUsersService();
 
 function authHeaders(cookie?: string) {
   return {
@@ -82,6 +85,7 @@ describe('api app', () => {
   });
 
   it('rejects protected endpoints without a session', async () => {
+    const adminResponse = await app.request('/api/admin/summary');
     const meResponse = await app.request('/api/me');
     const notesResponse = await app.request('/api/notes');
     const createResponse = await app.request('/api/notes', {
@@ -90,6 +94,7 @@ describe('api app', () => {
       body: JSON.stringify({ title: 'No session' }),
     });
 
+    expect(adminResponse.status).toBe(401);
     expect(meResponse.status).toBe(401);
     expect(notesResponse.status).toBe(401);
     expect(createResponse.status).toBe(401);
@@ -102,13 +107,30 @@ describe('api app', () => {
       headers: authHeaders(cookie),
     });
     const meBody = (await meResponse.json()) as {
-      user: { email: string };
+      user: { email: string; role: string };
       session: { id: string };
     };
 
     expect(meResponse.status).toBe(200);
     expect(meBody.user.email).toBe(email);
+    expect(meBody.user.role).toBe('member');
     expect(meBody.session.id).toEqual(expect.any(String));
+
+    const memberAdminResponse = await app.request('/api/admin/summary', {
+      headers: authHeaders(cookie),
+    });
+
+    expect(memberAdminResponse.status).toBe(403);
+
+    await usersService.updateRoleByEmail(email, 'admin');
+
+    const adminResponse = await app.request('/api/admin/summary', {
+      headers: authHeaders(cookie),
+    });
+    const adminBody = (await adminResponse.json()) as { role: string };
+
+    expect(adminResponse.status).toBe(200);
+    expect(adminBody.role).toBe('admin');
 
     const createResponse = await app.request('/api/notes', {
       method: 'POST',

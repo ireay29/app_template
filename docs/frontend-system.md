@@ -21,6 +21,7 @@ while still allowing MUI where it provides real leverage.
 | Generated API types     | `apps/web/src/generated/openapi.ts`                 |
 | Typed API client        | `apps/web/src/lib/api/client.ts`                    |
 | Typed API query bridge  | `apps/web/src/lib/api/query.ts`                     |
+| Protected route guard   | `apps/web/src/features/auth/ProtectedRoute.tsx`     |
 
 `DesignSystemProvider` wraps the app with MUI `ThemeProvider` and
 `CssBaseline`. Tailwind CSS variables define the shadcn/ui-compatible color,
@@ -92,3 +93,10 @@ presentation stay separate.
 - Keep Better Auth calls on `apps/web/src/lib/auth-client.ts`.
 - Keep hand-written fetch clients only for temporary bootstrap paths that are
   not yet covered by generated OpenAPI types.
+
+## Auth UI Rules
+
+- Use `ProtectedRoute` for pages that require a signed-in user.
+- Keep role enforcement in the API. UI checks are only a convenience.
+- Use admin-only API calls, such as `/api/admin/summary`, to prove role-specific
+  access paths.
