@@ -15,6 +15,14 @@ export type NotesRepository = {
   findByUserId(userId: string): Promise<Note[]>;
 };
 
+function requireInsertedNote(note: Note | undefined): Note {
+  if (!note) {
+    throw new Error('Failed to create note.');
+  }
+
+  return note;
+}
+
 export function createNotesRepository(): NotesRepository {
   return {
     async create(input) {
@@ -27,7 +35,7 @@ export function createNotesRepository(): NotesRepository {
         })
         .returning();
 
-      return note;
+      return requireInsertedNote(note);
     },
 
     findByUserId(userId) {

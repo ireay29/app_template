@@ -21,8 +21,10 @@ quickly.
 | ------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------ |
 | Web shell          | `apps/web/src/App.tsx`                                     | Shows API health, design-system examples, and the auth notes demo. |
 | Auth demo UI       | `apps/web/src/features/auth/AuthNotesDemo.tsx`             | Presentation for sign-up, sign-in, sign-out, and note creation.    |
-| Auth demo state    | `apps/web/src/features/auth/useAuthNotesDemo.ts`           | Session, form, feedback, and note side effects for the demo.       |
+| Auth demo state    | `apps/web/src/features/auth/useAuthNotesDemo.ts`           | Session, form, feedback orchestration, and note side effects.      |
+| Auth demo support  | `apps/web/src/features/auth/auth-notes-demo-*.ts`          | Demo form schemas, query keys, submit state, and messages.         |
 | Web API clients    | `apps/web/src/lib/api.ts`, `apps/web/src/lib/notes-api.ts` | Fetch wrappers for health and authenticated notes.                 |
+| Web fetch helpers  | `apps/web/src/lib/fetch-json.ts`                           | Shared JSON fetch and API error handling for hand-written clients. |
 | Auth client        | `apps/web/src/lib/auth-client.ts`                          | Better Auth React client.                                          |
 | API app            | `apps/api/src/app.ts`                                      | Hono app wiring, middleware, dependency setup, and error handling. |
 | API route wiring   | `apps/api/src/app-routes.ts`                               | Registers OpenAPI route handlers and docs.                         |

@@ -20,7 +20,15 @@ function getCookieHeader(response: Response) {
 
   return setCookie
     .split(/,(?=\s*[^;,]+=)/)
-    .map((cookie) => cookie.split(';')[0])
+    .map((cookie) => {
+      const [nameValue] = cookie.split(';');
+
+      if (!nameValue) {
+        throw new Error('Expected a cookie name and value.');
+      }
+
+      return nameValue;
+    })
     .join('; ');
 }
 

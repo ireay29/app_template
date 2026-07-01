@@ -33,6 +33,7 @@ blob-report/
 .eslintcache
 .prettiercache
 *.tsbuildinfo
+*wsl.localhost*/
 
 # Logs
 logs/

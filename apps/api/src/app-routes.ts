@@ -11,13 +11,22 @@ import { createNoteRoute, getNotesRoute } from './routes/notes.js';
 import type { AppEnv } from './types.js';
 
 type AppInstance = OpenAPIHono<AppEnv>;
+type DatabaseStatus = 'ok' | 'unavailable';
+
+async function getDatabaseStatus(
+  checkDatabase: AppDependencies['checkDatabase'],
+): Promise<DatabaseStatus> {
+  try {
+    await checkDatabase();
+    return 'ok';
+  } catch {
+    return 'unavailable';
+  }
+}
 
 export function registerSystemRoutes(app: AppInstance, dependencies: AppDependencies) {
   app.openapi(healthRoute, async (c) => {
-    const database = await dependencies
-      .checkDatabase()
-      .then(() => 'ok' as const)
-      .catch(() => 'unavailable' as const);
+    const database = await getDatabaseStatus(dependencies.checkDatabase);
 
     return c.json({
       status: 'ok',

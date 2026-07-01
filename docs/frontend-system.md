@@ -76,5 +76,6 @@ variables and the MUI theme so mixed screens remain visually consistent.
 
 `apps/web/src/features/auth/AuthNotesDemo.tsx` demonstrates a feature-level
 composition using shared primitives plus local form fields. Its behavior lives
-in `apps/web/src/features/auth/useAuthNotesDemo.ts`, keeping side effects and
-presentation separate.
+in `apps/web/src/features/auth/useAuthNotesDemo.ts`, with schemas and static
+state helpers colocated in the same feature folder so side effects and
+presentation stay separate.
