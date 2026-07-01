@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
+import { AppProviders } from './providers/app-providers';
 
 describe('App', () => {
   afterEach(() => {
@@ -42,7 +43,11 @@ describe('App', () => {
       }),
     );
 
-    render(<App />);
+    render(
+      <AppProviders>
+        <App />
+      </AppProviders>,
+    );
 
     expect(await screen.findByText('API online')).toBeInTheDocument();
   });

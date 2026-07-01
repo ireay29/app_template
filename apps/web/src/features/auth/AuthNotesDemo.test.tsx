@@ -37,7 +37,17 @@ vi.mock('@/lib/auth-client', () => ({
   },
 }));
 
+import { AppProviders } from '@/providers/app-providers';
+
 import { AuthNotesDemo } from './AuthNotesDemo';
+
+function renderAuthNotesDemo() {
+  return render(
+    <AppProviders>
+      <AuthNotesDemo />
+    </AppProviders>,
+  );
+}
 
 describe('AuthNotesDemo', () => {
   beforeEach(() => {
@@ -56,10 +66,27 @@ describe('AuthNotesDemo', () => {
   });
 
   it('shows the signed-out state', () => {
-    render(<AuthNotesDemo />);
+    renderAuthNotesDemo();
 
     expect(screen.getByText('Signed out')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save note' })).toBeDisabled();
+  });
+
+  it('signs in without requiring the name field', async () => {
+    renderAuthNotesDemo();
+
+    await userEvent.clear(screen.getByLabelText('Name'));
+    await userEvent.clear(screen.getByLabelText('Email'));
+    await userEvent.type(screen.getByLabelText('Email'), 'member@example.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    await waitFor(() =>
+      expect(authMock.signInEmail).toHaveBeenCalledWith({
+        email: 'member@example.com',
+        password: 'password1234',
+        rememberMe: true,
+      }),
+    );
   });
 
   it('creates a note for a signed-in user', async () => {
@@ -104,7 +131,7 @@ describe('AuthNotesDemo', () => {
       }),
     );
 
-    render(<AuthNotesDemo />);
+    renderAuthNotesDemo();
     await waitFor(() => expect(screen.getByText('No notes yet.')).toBeInTheDocument());
 
     await userEvent.clear(screen.getByLabelText('Note title'));
