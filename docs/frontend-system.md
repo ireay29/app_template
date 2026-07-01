@@ -33,6 +33,10 @@ radius, border, input, and ring tokens.
   `Slot`, and `cn`.
 - `Card`: basic card composition with header, title, description, and content
   slots.
+- `FeedbackState`: shared loading, empty, error, and unauthorized states.
+- `FormField`: shared label, input, textarea, and validation message styling.
+- `Dialog`: Radix-backed modal primitives for focused workflows.
+- `Toast`: Radix-backed provider and hook for transient app feedback.
 
 These primitives are intentionally small. Add more primitives only when they are
 shared across features or match a common app surface.

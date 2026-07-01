@@ -174,7 +174,6 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 
 ## 次に決めること
 
-- 共通 UI primitive の最小セット。
 - seed data に demo notes を含めるかどうか。
 
 ## 後回しにすること

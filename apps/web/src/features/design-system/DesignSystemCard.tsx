@@ -1,12 +1,25 @@
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import MuiButton from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
-import { PlayCircle, ShieldCheck } from 'lucide-react';
+import { Bell, Info, PlayCircle, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
 
 export function DesignSystemCard() {
+  const { toast } = useToast();
+
   return (
     <Card>
       <CardHeader>
@@ -27,6 +40,40 @@ export function DesignSystemCard() {
             <Button size="sm" variant="secondary">
               Secondary
             </Button>
+            <Button
+              onClick={() =>
+                toast({
+                  description: 'The shared toast provider is mounted at the app root.',
+                  title: 'Toast ready',
+                })
+              }
+              size="sm"
+              variant="outline"
+            >
+              <Bell aria-hidden="true" />
+              Toast
+            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <Info aria-hidden="true" />
+                  Dialog
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Shared dialog</DialogTitle>
+                  <DialogDescription>
+                    Dialog primitives are available for confirmations and focused workflows.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button">Close</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
