@@ -17,24 +17,27 @@ quickly.
 
 ## Feature Map
 
-| Area               | Entry Point                                                | Notes                                                              |
-| ------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| Web shell          | `apps/web/src/App.tsx`                                     | Shows API health, design-system examples, and the auth notes demo. |
-| Auth demo UI       | `apps/web/src/features/auth/AuthNotesDemo.tsx`             | Presentation for sign-up, sign-in, sign-out, and note creation.    |
-| Auth demo state    | `apps/web/src/features/auth/useAuthNotesDemo.ts`           | Session, form, feedback orchestration, and note side effects.      |
-| Auth demo support  | `apps/web/src/features/auth/auth-notes-demo-*.ts`          | Demo form schemas, query keys, submit state, and messages.         |
-| Web API clients    | `apps/web/src/lib/api.ts`, `apps/web/src/lib/notes-api.ts` | Fetch wrappers for health and authenticated notes.                 |
-| Web fetch helpers  | `apps/web/src/lib/fetch-json.ts`                           | Shared JSON fetch and API error handling for hand-written clients. |
-| Auth client        | `apps/web/src/lib/auth-client.ts`                          | Better Auth React client.                                          |
-| API app            | `apps/api/src/app.ts`                                      | Hono app wiring, middleware, dependency setup, and error handling. |
-| API route wiring   | `apps/api/src/app-routes.ts`                               | Registers OpenAPI route handlers and docs.                         |
-| API dependencies   | `apps/api/src/app-dependencies.ts`                         | Default dependency composition for auth, DB health, and notes.     |
-| Auth server        | `apps/api/src/auth/auth.ts`                                | Better Auth with the Drizzle adapter.                              |
-| Session middleware | `apps/api/src/middleware/session.ts`                       | Loads the Better Auth session into Hono context.                   |
-| Notes domain       | `apps/api/src/notes`                                       | Notes service and repository boundary.                             |
-| API presenters     | `apps/api/src/http/presenters.ts`                          | Converts domain/session records into API response shapes.          |
-| Database schema    | `apps/api/src/db/schema`                                   | Better Auth tables and the `notes` table.                          |
-| Migrations         | `apps/api/drizzle`                                         | Initial Drizzle migration and metadata.                            |
+| Area                | Entry Point                                                | Notes                                                              |
+| ------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| Web shell           | `apps/web/src/App.tsx`                                     | Shows API health, design-system examples, and the auth notes demo. |
+| Auth demo UI        | `apps/web/src/features/auth/AuthNotesDemo.tsx`             | Presentation for sign-up, sign-in, sign-out, and note creation.    |
+| Auth demo state     | `apps/web/src/features/auth/useAuthNotesDemo.ts`           | Session, form, feedback orchestration, and note side effects.      |
+| Auth demo support   | `apps/web/src/features/auth/auth-notes-demo-*.ts`          | Demo form schemas, query keys, submit state, and messages.         |
+| Web API clients     | `apps/web/src/lib/api.ts`, `apps/web/src/lib/notes-api.ts` | Fetch wrappers for health and authenticated notes.                 |
+| Web fetch helpers   | `apps/web/src/lib/fetch-json.ts`                           | Shared JSON fetch and API error handling for hand-written clients. |
+| Generated API types | `apps/web/src/generated/openapi.ts`                        | Generated from the Hono OpenAPI document; do not edit by hand.     |
+| Typed API client    | `apps/web/src/lib/api/client.ts`                           | `openapi-fetch` client configured for same-origin API calls.       |
+| Typed API queries   | `apps/web/src/lib/api/query.ts`                            | `openapi-react-query` bridge for TanStack Query usage.             |
+| Auth client         | `apps/web/src/lib/auth-client.ts`                          | Better Auth React client.                                          |
+| API app             | `apps/api/src/app.ts`                                      | Hono app wiring, middleware, dependency setup, and error handling. |
+| API route wiring    | `apps/api/src/app-routes.ts`                               | Registers OpenAPI route handlers and docs.                         |
+| API dependencies    | `apps/api/src/app-dependencies.ts`                         | Default dependency composition for auth, DB health, and notes.     |
+| Auth server         | `apps/api/src/auth/auth.ts`                                | Better Auth with the Drizzle adapter.                              |
+| Session middleware  | `apps/api/src/middleware/session.ts`                       | Loads the Better Auth session into Hono context.                   |
+| Notes domain        | `apps/api/src/notes`                                       | Notes service and repository boundary.                             |
+| API presenters      | `apps/api/src/http/presenters.ts`                          | Converts domain/session records into API response shapes.          |
+| Database schema     | `apps/api/src/db/schema`                                   | Better Auth tables and the `notes` table.                          |
+| Migrations          | `apps/api/drizzle`                                         | Initial Drizzle migration and metadata.                            |
 
 ## Runtime Flow
 
@@ -79,6 +82,8 @@ path, including coverage, production builds, and Playwright E2E.
 
 - Add new API route schemas under `apps/api/src/routes`, then register handlers
   in `apps/api/src/app-routes.ts`.
+- Run `pnpm openapi:generate` after changing API route schemas and commit the
+  updated `apps/web/src/generated/openapi.ts` file.
 - Keep DB access behind a repository or service boundary instead of placing
   queries directly in `app.ts`.
 - Add new database tables under `apps/api/src/db/schema`, export them from

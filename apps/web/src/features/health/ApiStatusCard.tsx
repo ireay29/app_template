@@ -4,6 +4,7 @@ import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorState, LoadingState } from '@/components/ui/feedback-state';
+import { getErrorMessage } from '@/lib/errors';
 
 import { useHealthQuery } from './useHealthQuery';
 
@@ -32,9 +33,7 @@ export function ApiStatusCard() {
           {health.isError && (
             <ErrorState
               className="min-h-24 border-zinc-800 bg-zinc-900 text-zinc-50"
-              description={
-                health.error instanceof Error ? health.error.message : 'Unknown API error'
-              }
+              description={getErrorMessage(health.error, 'Unknown API error')}
               title="API health check failed"
             />
           )}

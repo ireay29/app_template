@@ -18,6 +18,9 @@ while still allowing MUI where it provides real leverage.
 | shadcn/ui config        | `apps/web/components.json`                          |
 | UI primitives           | `apps/web/src/components/ui`                        |
 | Class merging helper    | `apps/web/src/lib/utils.ts`                         |
+| Generated API types     | `apps/web/src/generated/openapi.ts`                 |
+| Typed API client        | `apps/web/src/lib/api/client.ts`                    |
+| Typed API query bridge  | `apps/web/src/lib/api/query.ts`                     |
 
 `DesignSystemProvider` wraps the app with MUI `ThemeProvider` and
 `CssBaseline`. Tailwind CSS variables define the shadcn/ui-compatible color,
@@ -79,3 +82,13 @@ composition using shared primitives plus local form fields. Its behavior lives
 in `apps/web/src/features/auth/useAuthNotesDemo.ts`, with schemas and static
 state helpers colocated in the same feature folder so side effects and
 presentation stay separate.
+
+## API Client Rules
+
+- Treat `apps/web/src/generated/openapi.ts` as generated code.
+- Run `pnpm openapi:generate` after changing `apps/api/src/routes`.
+- Prefer `apps/web/src/lib/api/client.ts` and `apps/web/src/lib/api/query.ts`
+  for new API calls.
+- Keep Better Auth calls on `apps/web/src/lib/auth-client.ts`.
+- Keep hand-written fetch clients only for temporary bootstrap paths that are
+  not yet covered by generated OpenAPI types.

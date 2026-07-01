@@ -1,16 +1,12 @@
-import { fetchJson } from './fetch-json';
+import type { MethodResponse } from 'openapi-fetch';
 
-export type HealthResponse = {
-  status: 'ok';
-  service: string;
-  uptime: number;
-  database: 'ok' | 'unavailable';
-};
+import { apiClient } from './api/client';
+import { requireApiData } from './api/response';
+
+export type HealthResponse = MethodResponse<typeof apiClient, 'get', '/api/health'>;
 
 export async function getHealth(signal?: AbortSignal): Promise<HealthResponse> {
-  return fetchJson<HealthResponse>(
-    '/api/health',
-    { signal },
-    (response) => `API health check failed with ${response.status}`,
-  );
+  const result = await apiClient.GET('/api/health', { signal });
+
+  return requireApiData(result, `API health check failed with ${result.response.status}`);
 }

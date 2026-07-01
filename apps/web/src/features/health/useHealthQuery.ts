@@ -1,10 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-
-import { getHealth } from '@/lib/api';
+import { apiQuery } from '@/lib/api/query';
 
 export function useHealthQuery() {
-  return useQuery({
-    queryFn: ({ signal }) => getHealth(signal),
-    queryKey: ['health'],
-  });
+  return apiQuery.useQuery('get', '/api/health');
 }

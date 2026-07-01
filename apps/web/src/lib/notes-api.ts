@@ -1,34 +1,22 @@
-import { fetchJson } from './fetch-json';
+import type { MethodResponse } from 'openapi-fetch';
 
-export type DemoNote = {
-  id: string;
-  title: string;
-  body: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+import { apiClient } from './api/client';
+import { requireApiData } from './api/response';
 
-type NotesResponse = { notes: DemoNote[] };
-type CreateNoteResponse = { note: DemoNote };
+type NotesResponse = MethodResponse<typeof apiClient, 'get', '/api/notes'>;
+
+export type DemoNote = NotesResponse['notes'][number];
 
 export async function getNotes(signal?: AbortSignal): Promise<DemoNote[]> {
-  const body = await fetchJson<NotesResponse>('/api/notes', {
-    credentials: 'include',
-    signal,
-  });
+  const result = await apiClient.GET('/api/notes', { signal });
+  const body = requireApiData(result, `Notes request failed with ${result.response.status}`);
 
   return body.notes;
 }
 
 export async function createNote(input: { title: string; body?: string }): Promise<DemoNote> {
-  const body = await fetchJson<CreateNoteResponse>('/api/notes', {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(input),
-  });
+  const result = await apiClient.POST('/api/notes', { body: input });
+  const body = requireApiData(result, `Note creation failed with ${result.response.status}`);
 
   return body.note;
 }

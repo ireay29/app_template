@@ -105,8 +105,10 @@ describe('AuthNotesDemo', () => {
 
     vi.stubGlobal(
       'fetch',
-      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-        if (init?.method === 'POST') {
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const method = input instanceof Request ? input.method : init?.method;
+
+        if (method === 'POST') {
           return new Response(
             JSON.stringify({
               note: {
