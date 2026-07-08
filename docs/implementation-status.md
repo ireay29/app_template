@@ -93,6 +93,16 @@ pnpm agent:verify
 checks format, lint, types, and tests. `agent:verify` runs the full local CI
 path, including coverage, production builds, and Playwright E2E.
 
+For interactive unit test review, run:
+
+```sh
+pnpm test:ui
+pnpm test:ui:api
+```
+
+The Web Vitest UI uses port `51204`. The API Vitest UI uses port `51205` and
+requires the local PostgreSQL service and migrations.
+
 ## Extension Points
 
 - Add new API route schemas under `apps/api/src/routes`, then register handlers

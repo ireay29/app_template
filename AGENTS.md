@@ -42,6 +42,7 @@ pnpm agent:quick
 pnpm agent:verify
 pnpm fix
 pnpm clean
+pnpm test:ui
 ```
 
 ## 検証コマンド
@@ -51,6 +52,8 @@ pnpm clean
 - `pnpm typecheck`: TypeScript
 - `pnpm test`: Vitest
 - `pnpm test:coverage`: Vitest coverage
+- `pnpm test:ui`: Vitest UI for `apps/web`
+- `pnpm test:ui:api`: Vitest UI for `apps/api`
 - `pnpm build`: API and web production build
 - `pnpm test:e2e`: Playwright
 - `pnpm check`: full local verification

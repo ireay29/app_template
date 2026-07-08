@@ -12,7 +12,8 @@
     "lint:fix": "eslint . --fix",
     "test": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp vitest run",
     "test:coverage": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp vitest run --coverage",
-    "test:watch": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp vitest"
+    "test:watch": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp vitest",
+    "test:ui": "cross-env TMPDIR=/tmp TEMP=/tmp TMP=/tmp vitest --ui --api 51204"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

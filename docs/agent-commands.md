@@ -29,6 +29,16 @@ pnpm fix
 
 Runs Prettier and ESLint auto-fixes.
 
+## Interactive Tests
+
+```sh
+pnpm test:ui
+pnpm test:ui:api
+```
+
+Opens Vitest UI for the Web package on port `51204` or API package on port
+`51205`. The API UI expects PostgreSQL to be running and migrated.
+
 ## Cleanup
 
 ```sh

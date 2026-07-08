@@ -39,6 +39,9 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm test:coverage
+pnpm test:ui
+pnpm test:ui:web
+pnpm test:ui:api
 pnpm build
 pnpm test:e2e
 pnpm check
@@ -48,6 +51,10 @@ The DB-backed commands (`pnpm test`, `pnpm test:coverage`, `pnpm check`, and
 `pnpm ci`) expect PostgreSQL to be running and migrated. For local agent or
 human verification, prefer `pnpm agent:quick` or `pnpm agent:verify`; both start
 PostgreSQL, wait for readiness, and run migrations before checking the app.
+
+`pnpm test:ui` opens the Web Vitest UI on port `51204`. Use
+`pnpm test:ui:api` for API tests on port `51205`; API tests require the local
+PostgreSQL service and migrations.
 
 ## Database and Auth
 
