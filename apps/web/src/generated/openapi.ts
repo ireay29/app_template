@@ -187,6 +187,75 @@ export interface paths {
               service: string;
               /** @example 12.34 */
               uptime: number;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/ready': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Returns API readiness status, including database connectivity. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * @example ok
+               * @enum {string}
+               */
+              status: 'ok';
+              /** @example api */
+              service: string;
+              /** @example 12.34 */
+              uptime: number;
+              /**
+               * @example ok
+               * @enum {string}
+               */
+              database: 'ok' | 'unavailable';
+            };
+          };
+        };
+        /** @description Returns unavailable readiness status when a dependency is down. */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * @example ok
+               * @enum {string}
+               */
+              status: 'ok';
+              /** @example api */
+              service: string;
+              /** @example 12.34 */
+              uptime: number;
               /**
                * @example ok
                * @enum {string}

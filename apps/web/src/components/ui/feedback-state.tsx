@@ -1,4 +1,4 @@
-import { AlertCircle, Ban, Inbox, Loader2 } from 'lucide-react';
+import { AlertCircle, Ban, Inbox, Loader2, ShieldX } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -8,12 +8,13 @@ type FeedbackStateProps = {
   className?: string;
   description?: string;
   title: string;
-  variant: 'loading' | 'empty' | 'error' | 'unauthorized';
+  variant: 'loading' | 'empty' | 'error' | 'forbidden' | 'unauthorized';
 };
 
 const icons = {
   empty: Inbox,
   error: AlertCircle,
+  forbidden: ShieldX,
   loading: Loader2,
   unauthorized: Ban,
 };
@@ -56,6 +57,10 @@ export function EmptyState(props: Omit<FeedbackStateProps, 'variant'>) {
 
 export function ErrorState(props: Omit<FeedbackStateProps, 'variant'>) {
   return <FeedbackState {...props} variant="error" />;
+}
+
+export function ForbiddenState(props: Omit<FeedbackStateProps, 'variant'>) {
+  return <FeedbackState {...props} variant="forbidden" />;
 }
 
 export function UnauthorizedState(props: Omit<FeedbackStateProps, 'variant'>) {

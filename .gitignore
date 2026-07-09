@@ -30,10 +30,15 @@ blob-report/
 !.env.*.example
 
 # Tool caches
+.vercel/
 .eslintcache
 .prettiercache
 *.tsbuildinfo
 *wsl.localhost*/
+
+# Supabase local runtime state
+supabase/.branches/
+supabase/.temp/
 
 # Logs
 logs/

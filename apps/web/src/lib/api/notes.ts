@@ -1,7 +1,7 @@
 import type { MethodResponse } from 'openapi-fetch';
 
-import { apiClient } from './api/client';
-import { requireApiData } from './api/response';
+import { apiClient } from './client';
+import { requireApiData } from './response';
 
 type NotesResponse = MethodResponse<typeof apiClient, 'get', '/api/notes'>;
 

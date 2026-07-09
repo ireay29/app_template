@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
 
-import { app } from './app.js';
+import { app, createApp } from './app.js';
 import { closeDatabase } from './db/client.js';
 import { createUsersService } from './users/users-service.js';
 
@@ -65,6 +65,20 @@ describe('api app', () => {
     const body = (await response.json()) as {
       status: string;
       service: string;
+    };
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      status: 'ok',
+      service: 'api',
+    });
+  });
+
+  it('returns readiness status', async () => {
+    const response = await app.request('/api/ready');
+    const body = (await response.json()) as {
+      status: string;
+      service: string;
       database: string;
     };
 
@@ -73,6 +87,47 @@ describe('api app', () => {
       status: 'ok',
       service: 'api',
       database: 'ok',
+    });
+  });
+
+  it('returns unavailable readiness status when the database check fails', async () => {
+    const unavailableApp = createApp({
+      checkDatabase: async () => {
+        throw new Error('database unavailable');
+      },
+      handleAuth: () => new Response(null, { status: 404 }),
+      notesService: {
+        createForUser: async () => {
+          throw new Error('not implemented');
+        },
+        listForUser: async () => {
+          throw new Error('not implemented');
+        },
+      },
+      usersService: {
+        findByEmail: async () => {
+          throw new Error('not implemented');
+        },
+        requireById: async () => {
+          throw new Error('not implemented');
+        },
+        updateRoleByEmail: async () => {
+          throw new Error('not implemented');
+        },
+      },
+    });
+    const response = await unavailableApp.request('/api/ready');
+    const body = (await response.json()) as {
+      status: string;
+      service: string;
+      database: string;
+    };
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({
+      status: 'ok',
+      service: 'api',
+      database: 'unavailable',
     });
   });
 

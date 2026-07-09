@@ -10,6 +10,9 @@ export const auth = betterAuth({
   basePath: '/api/auth',
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins: webOrigins,
+  advanced: {
+    disableOriginCheck: env.NODE_ENV !== 'production',
+  },
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema,

@@ -1,4 +1,3 @@
-import Chip from '@mui/material/Chip';
 import { ExternalLink } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -41,7 +40,6 @@ export function ApiStatusCard() {
             <pre className="overflow-x-auto">
               {JSON.stringify(
                 {
-                  database: health.data.database,
                   service: health.data.service,
                   status: health.data.status,
                   uptime: Number(health.data.uptime.toFixed(2)),
@@ -73,7 +71,16 @@ export function ApiStatusCard() {
 
 function StatusChip({ state }: { state: 'loading' | 'ready' | 'error' }) {
   const label = state === 'ready' ? 'API online' : state === 'error' ? 'API offline' : 'Checking';
-  const color = state === 'ready' ? 'success' : state === 'error' ? 'error' : 'default';
+  const className =
+    state === 'ready'
+      ? 'border-teal-200 bg-teal-50 text-teal-700'
+      : state === 'error'
+        ? 'border-red-200 bg-red-50 text-red-700'
+        : 'border-zinc-200 bg-zinc-50 text-zinc-600';
 
-  return <Chip color={color} label={label} size="small" variant="outlined" />;
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${className}`}>
+      {label}
+    </span>
+  );
 }

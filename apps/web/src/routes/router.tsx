@@ -1,9 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
 
 import { ErrorState } from '@/components/ui/feedback-state';
-import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
-import { AdminPage } from '@/pages/admin/AdminPage';
 import { HomePage } from '@/pages/home/HomePage';
+import { AdminRoute } from '@/routes/AdminRoute';
 
 export const router = createBrowserRouter([
   {
@@ -19,11 +18,7 @@ export const router = createBrowserRouter([
     path: '/',
   },
   {
-    element: (
-      <ProtectedRoute>
-        <AdminPage />
-      </ProtectedRoute>
-    ),
+    element: <AdminRoute />,
     path: '/admin',
   },
 ]);

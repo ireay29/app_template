@@ -9,7 +9,7 @@ import {
   UnauthorizedState,
 } from '@/components/ui/feedback-state';
 import { FormField, TextArea, TextInput } from '@/components/ui/form-field';
-import type { DemoNote } from '@/lib/notes-api';
+import type { DemoNote } from '@/lib/api/notes';
 
 import { type AuthNotesDemoModel, type Feedback, useAuthNotesDemo } from './useAuthNotesDemo';
 

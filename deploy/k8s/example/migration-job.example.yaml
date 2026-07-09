@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: app-template-api-migrate
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: registry.example.com/app-template-api-migration:latest
+          command: ['pnpm', 'db:migrate']
+          envFrom:
+            - configMapRef:
+                name: app-template-api-config
+            - secretRef:
+                name: app-template-api-secret
+            - secretRef:
+                name: app-template-api-migration-secret
+  backoffLimit: 1

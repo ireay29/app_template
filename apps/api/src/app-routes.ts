@@ -11,7 +11,7 @@ import {
 import { requireAuth } from './middleware/session.js';
 import { adminSummaryRoute } from './routes/admin.js';
 import { greetingRoute } from './routes/greeting.js';
-import { healthRoute } from './routes/health.js';
+import { healthRoute, readyRoute } from './routes/health.js';
 import { meRoute } from './routes/me.js';
 import { createNoteRoute, getNotesRoute } from './routes/notes.js';
 import type { AppEnv } from './types.js';
@@ -32,14 +32,27 @@ async function getDatabaseStatus(
 
 export function registerSystemRoutes(app: AppInstance, dependencies: AppDependencies) {
   app.openapi(healthRoute, async (c) => {
-    const database = await getDatabaseStatus(dependencies.checkDatabase);
-
     return c.json({
       status: 'ok',
       service: 'api',
       uptime: process.uptime(),
-      database,
     });
+  });
+
+  app.openapi(readyRoute, async (c) => {
+    const database = await getDatabaseStatus(dependencies.checkDatabase);
+    const body = {
+      status: 'ok' as const,
+      service: 'api',
+      uptime: process.uptime(),
+      database,
+    };
+
+    if (database === 'unavailable') {
+      return c.json(body, 503);
+    }
+
+    return c.json(body, 200);
   });
 
   app.openapi(greetingRoute, (c) => {

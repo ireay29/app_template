@@ -10,6 +10,9 @@ const healthResponseSchema = z.object({
   uptime: z.number().openapi({
     example: 12.34,
   }),
+});
+
+const readyResponseSchema = healthResponseSchema.extend({
   database: z.enum(['ok', 'unavailable']).openapi({
     example: 'ok',
   }),
@@ -26,6 +29,30 @@ export const healthRoute = createRoute({
         },
       },
       description: 'Returns API health status.',
+    },
+  },
+  tags: ['System'],
+});
+
+export const readyRoute = createRoute({
+  method: 'get',
+  path: '/api/ready',
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: readyResponseSchema,
+        },
+      },
+      description: 'Returns API readiness status, including database connectivity.',
+    },
+    503: {
+      content: {
+        'application/json': {
+          schema: readyResponseSchema,
+        },
+      },
+      description: 'Returns unavailable readiness status when a dependency is down.',
     },
   },
   tags: ['System'],

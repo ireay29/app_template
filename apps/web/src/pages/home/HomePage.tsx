@@ -1,10 +1,17 @@
 import { ShieldCheck } from 'lucide-react';
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
+import { LoadingState } from '@/components/ui/feedback-state';
 import { AuthNotesDemo } from '@/features/auth/AuthNotesDemo';
-import { DesignSystemCard } from '@/features/design-system/DesignSystemCard';
 import { ApiStatusCard } from '@/features/health/ApiStatusCard';
+
+const DesignSystemCard = lazy(() =>
+  import('@/features/design-system/DesignSystemCard').then((module) => ({
+    default: module.DesignSystemCard,
+  })),
+);
 
 export function HomePage() {
   return (
@@ -33,7 +40,9 @@ export function HomePage() {
 
         <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
           <ApiStatusCard />
-          <DesignSystemCard />
+          <Suspense fallback={<LoadingState title="Loading design system examples..." />}>
+            <DesignSystemCard />
+          </Suspense>
         </div>
 
         <div className="mt-4">

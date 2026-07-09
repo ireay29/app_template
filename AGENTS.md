@@ -43,6 +43,8 @@ pnpm agent:verify
 pnpm fix
 pnpm clean
 pnpm test:ui
+pnpm dev:supabase
+pnpm dev:vercel
 ```
 
 ## 検証コマンド
@@ -55,6 +57,10 @@ pnpm test:ui
 - `pnpm test:ui`: Vitest UI for `apps/web`
 - `pnpm test:ui:api`: Vitest UI for `apps/api`
 - `pnpm build`: API and web production build
+- `pnpm deploy:check`: deployment support file check
+- `pnpm supabase:verify`: Supabase local verification path
+- `pnpm vercel:check`: Vercel support check
+- `pnpm container:smoke`: API container smoke test
 - `pnpm test:e2e`: Playwright
 - `pnpm check`: full local verification
 - `pnpm ci`: CI entrypoint
@@ -80,7 +86,7 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 - Tailwind class の結合は `apps/web/src/lib/utils.ts` の `cn` を使うこと。
 - アイコンは原則 `lucide-react` を使い、MUI component と組み合わせる場合のみ MUI icons を使うこと。
 - brand color、radius、typography を変更する場合は Tailwind tokens と MUI theme の両方を更新すること。
-- loading、empty、error、unauthorized、toast、dialog は共通 UI として用意し、feature ごとに重複実装しないこと。
+- loading、empty、error、unauthorized、forbidden、toast、dialog は共通 UI として用意し、feature ごとに重複実装しないこと。
 - Storybook は導入しない。必要な確認は app 内の実装例、component tests、E2E で担保すること。
 
 ## API 方針
@@ -88,6 +94,8 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 - route schema は `apps/api/src/routes` に置くこと。
 - route handler の登録は `apps/api/src/app-routes.ts` に集約すること。
 - `apps/api/src/app.ts` は Hono app の配線、middleware、error handling を中心に保つこと。
+- runtime 固有処理は `apps/api/src/index.ts` や `api/[...route].ts` などの薄い entrypoint に閉じ込めること。
+- Vercel、Docker、Kubernetes、AWS、Alibaba などの provider 固有処理を service、repository、route handler に漏らさないこと。
 - DB access を route handler や `app.ts` に直接書かないこと。
 - business logic は service、永続化は repository、response 変換は presenter に分けること。
 - protected endpoint は `sessionContext` を使い、未認証時は `401` を返すこと。
@@ -108,7 +116,10 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 - DB schema は `apps/api/src/db/schema` に置くこと。
 - schema を追加・変更したら `apps/api/src/db/schema/index.ts` から export すること。
 - migration は `pnpm db:generate` で生成し、`apps/api/drizzle` を Git 管理すること。
-- local DB は Docker Compose の PostgreSQL を前提にすること。
+- local DB は Docker Compose PostgreSQL を標準fallback、Supabase local Postgres をVercel検証用として扱うこと。
+- SupabaseはPostgres/local infra用途で使い、Supabase Authへ移行しないこと。
+- runtime DB接続は `DATABASE_URL`、migration/direct接続は `DATABASE_MIGRATION_URL` を使うこと。
+- production runtime 起動時にmigrationやseedを実行しないこと。
 - Better Auth は `/api/auth/*` に mount される。
 - protected API を web から呼ぶ場合は `credentials: "include"` を使うこと。
 - 認証は必須機能として扱い、protected page と protected API の標準形を用意すること。
@@ -118,6 +129,16 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 - seed data は admin user と member user を1件ずつ用意すること。
 - demo notes などの追加 seed は、開発体験と E2E の安定性に必要な範囲に絞ること。
 - seed は本番実行されないようにコマンドと環境を分けること。
+
+## Deploy 方針
+
+- Vercel + Supabase は検証用の参照構成であり、本番標準providerとして固定しないこと。
+- 本番infraはAWS、Alibaba Cloud、Kubernetes、VMなど要件に応じて選べるようにすること。
+- 上位契約は `docs/deployment-contract.md` に置き、provider別手順は具体例として分けること。
+- API liveness は `/api/health`、DB込みreadinessは `/api/ready` とすること。
+- API container は `Dockerfile.api` をportable baselineとすること。
+- Webは `apps/web/dist` のstatic outputを標準成果物とし、Web containerやsingle imageは要件確定まで作り込まないこと。
+- Kubernetes manifest は `deploy/k8s/example` のsample扱いとし、そのままproduction-readyと見なさないこと。
 
 ## Test 方針
 
@@ -171,14 +192,13 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 - Common UI: `apps/web/src/components` 配下に loading、empty、error、unauthorized、toast、dialog を用意する
 - Auth/Authz: protected page、protected API、`admin` / `member` role を標準化する
 - Seed: `admin@example.com` と `member@example.com` を1件ずつ用意し、初期passwordはlocal用に `password1234` とする
+- Demo seed: local/dev seed には admin/member それぞれの demo note を1件ずつ含める
 - API client: `openapi-typescript`、`openapi-fetch`、`openapi-react-query` による OpenAPI 生成へ寄せる
 - OpenAPI command: `pnpm openapi:generate` で生成し、`pnpm openapi:check` をCI差分検知に使う
 - Storybook: 導入しない
-
-## 次に決めること
-
-- seed data に demo notes を含めるかどうか。
+- Vercel/Supabase: 検証用構成として導入し、認証はBetter Authを継続する
+- Deployment contract: provider-neutralに保ち、production providerは要件確定後に選ぶ
 
 ## 後回しにすること
 
-- deploy target、環境変数、health check、migration 実行方針は、実際の配備先を決める段階で固定する。
+- production provider、IaC、network、secret manager、observability、autoscaling、managed DB 製品選定は、実際の配備先を決める段階で固定する。

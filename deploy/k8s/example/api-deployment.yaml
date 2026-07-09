@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-template-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-template-api
+  template:
+    metadata:
+      labels:
+        app: app-template-api
+    spec:
+      containers:
+        - name: api
+          image: registry.example.com/app-template-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8787
+          envFrom:
+            - configMapRef:
+                name: app-template-api-config
+            - secretRef:
+                name: app-template-api-secret
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15

@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 
+import { createNote, type DemoNote, getNotes } from '@/lib/api/notes';
 import { authClient } from '@/lib/auth-client';
 import { getErrorMessage } from '@/lib/errors';
-import { createNote, type DemoNote, getNotes } from '@/lib/notes-api';
 
 import {
   authFormSchema,
