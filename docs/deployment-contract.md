@@ -77,6 +77,19 @@ See `docs/vercel-supabase.md` for concrete commands.
 The API container is the portable production baseline. Web delivery can be
 static hosting, CDN, or a separate container depending on product requirements.
 
+Terraform is a platform-side implementation option, not an application
+runtime dependency. The scaffold under `infra/terraform` keeps provider-specific
+root modules and modules outside the app domain/service/repository boundaries.
+The Alibaba Cloud stack is an example only; this repository does not select a
+production provider. Terraform state, credentials, plans, and real tfvars stay
+outside Git. Shared OSS state must use versioning, private access, encryption,
+least-privilege RAM policy, and TableStore locking.
+
+The Terraform validation gate runs `fmt`, wrapper tests, and a sandbox
+`init -backend=false` followed by `validate`. It does not run `plan`, `apply`,
+or `destroy`, and it is intentionally separate from the normal application CI
+until provider download integration is decided.
+
 The container smoke test must verify `GET /api/health` without requiring a
 database. Readiness checks that include the database belong to environments
 where a database is available.

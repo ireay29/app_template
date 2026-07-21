@@ -1,0 +1,8 @@
+bucket                   = "replace-with-private-oss-bucket"
+prefix                   = "app-template/alicloud/sandbox"
+key                      = "terraform.tfstate"
+region                   = "cn-hangzhou"
+tablestore_table         = "terraform-state-lock"
+tablestore_endpoint      = "https://replace-with-tablestore-endpoint"
+tablestore_instance_name = "replace-with-tablestore-instance"
+encrypt                  = true

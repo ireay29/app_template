@@ -18,6 +18,9 @@ quickly.
 - `Dockerfile.api`: provider-neutral API container build with a separate
   migration target.
 - `deploy/k8s/example`: non-production Kubernetes deployment samples.
+- `infra/terraform`: provider-specific Terraform scaffold with an Alibaba Cloud
+  sandbox root module and independent validation gate.
+- `scripts/terraform.sh`: version-checked, path-safe Terraform CLI wrapper.
 
 ## Feature Map
 
@@ -50,6 +53,8 @@ quickly.
 | Deploy contract     | `docs/deployment-contract.md`                     | Provider-neutral runtime, DB, health, and migration contract.      |
 | Vercel/Supabase     | `docs/vercel-supabase.md`                         | Verification stack setup and commands.                             |
 | Runtime adapters    | `docs/runtime-adapters.md`                        | Runtime boundary rules for Node, Vercel, and future adapters.      |
+| Terraform scaffold  | `infra/terraform/README.md`                       | Stack layout, backend, credential, and provider-neutrality rules.  |
+| Terraform checks    | `scripts/terraform-check.sh`                      | Independent fmt, wrapper, init, and validate gate.                 |
 
 ## Runtime Flow
 
@@ -143,6 +148,16 @@ pnpm container:smoke
 `container:smoke` requires Docker and checks `/api/health` without requiring a
 database.
 
+For the Terraform scaffold, run:
+
+```sh
+pnpm terraform:check
+```
+
+This does not run cloud resource changes. The sandbox is initialized with the
+backend disabled, and real plan/apply work requires an explicit OSS backend
+configuration.
+
 ## Extension Points
 
 - Add new API route schemas under `apps/api/src/routes`, then register handlers
@@ -177,3 +192,5 @@ database.
   DB, API, and web integration path.
 - Production infrastructure provider is intentionally not selected. The
   template provides a provider-neutral deployment contract and examples only.
+- Terraform CLI is pinned to `1.15.8`; the Alibaba Cloud provider scaffold is an
+  example and does not select Alibaba Cloud as the production provider.

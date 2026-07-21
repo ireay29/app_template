@@ -51,6 +51,27 @@ pnpm container:smoke
 present. `container:smoke` builds the API container and checks `/api/health`;
 it requires Docker but does not require a database.
 
+## Terraform scaffold
+
+```sh
+pnpm terraform -- alicloud/sandbox init -backend=false -input=false -lockfile=readonly
+pnpm terraform -- alicloud/sandbox validate
+pnpm terraform:fmt
+pnpm terraform:wrapper:test
+pnpm terraform:check
+```
+
+`terraform:check` is an independent gate. It runs wrapper tests, recursive
+format checking, and the sandbox `init -backend=false` / `validate` path. It is
+not included in `pnpm check` or `pnpm ci` until provider download and ordinary
+CI integration are decided by a follow-up issue.
+
+The wrapper and `terraform:fmt` require the CLI version in
+`.terraform-version`, reject absolute and traversal paths, prevent symlink
+escape from `infra/terraform/stacks`, and do not print credentials. The sandbox
+validation must not be followed by a real `plan` or `apply`; initialize the OSS
+backend with `-reconfigure -backend-config=backend.hcl` first.
+
 ## Fixes
 
 ```sh
