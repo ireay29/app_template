@@ -36,9 +36,27 @@ PATH="$test_path" \
 FAKE_TERRAFORM_LOG="$log_file" \
   "$wrapper" -- alicloud/sandbox init -backend=false -input=false -lockfile=readonly
 
-expected='-chdir=infra/terraform/stacks/alicloud/sandbox init -backend=false -input=false -lockfile=readonly'
-actual=$(sed -n '1p' "$log_file")
-[ "$actual" = "$expected" ] || fail "Terraform arguments were not forwarded as expected"
+assert_log_line() {
+  line_number=$1
+  expected=$2
+  actual=$(sed -n "${line_number}p" "$log_file")
+  [ "$actual" = "$expected" ] || fail "line $line_number expected '$expected', got '$actual'"
+}
+
+assert_log_line 1 '-chdir=infra/terraform/stacks/alicloud/sandbox'
+assert_log_line 2 init
+assert_log_line 3 '-backend=false'
+assert_log_line 4 '-input=false'
+assert_log_line 5 '-lockfile=readonly'
+
+set +e
+PATH="$test_path" \
+FAKE_TERRAFORM_LOG="$log_file" \
+FAKE_TERRAFORM_EXIT=23 \
+  "$wrapper" alicloud/sandbox validate >/dev/null 2>&1
+exit_code=$?
+set -e
+[ "$exit_code" -eq 23 ] || fail "Terraform exit code was not preserved"
 
 expect_failure() {
   expected_message=$1
@@ -53,6 +71,33 @@ expect_failure() {
       ;;
     *)
       fail "missing error message: $expected_message"
+      ;;
+  esac
+}
+
+create_version_fixture() {
+  fixture_root=$1
+  mkdir -p "$fixture_root/scripts" "$fixture_root/infra/terraform/stacks/alicloud/sandbox"
+  cp "$wrapper" "$fixture_root/scripts/terraform.sh"
+  cp "$repo_root/scripts/terraform-version.sh" "$fixture_root/scripts/terraform-version.sh"
+  chmod +x "$fixture_root/scripts/terraform.sh" "$fixture_root/scripts/terraform-version.sh"
+  printf '1.15.8\n' > "$fixture_root/.terraform-version"
+}
+
+expect_fixture_failure() {
+  expected_message=$1
+  fixture_root=$2
+
+  if output=$(PATH="$test_path" FAKE_TERRAFORM_LOG="$log_file" \
+    "$fixture_root/scripts/terraform.sh" alicloud/sandbox validate 2>&1); then
+    fail "expected fixture failure: $expected_message"
+  fi
+
+  case "$output" in
+    *"$expected_message"*)
+      ;;
+    *)
+      fail "missing fixture error message: $expected_message"
       ;;
   esac
 }
@@ -102,5 +147,15 @@ case "$output" in
     fail "credentials leaked to wrapper output"
     ;;
 esac
+
+missing_version_fixture="$temp_dir/missing-version"
+create_version_fixture "$missing_version_fixture"
+rm "$missing_version_fixture/.terraform-version"
+expect_fixture_failure "missing .terraform-version" "$missing_version_fixture"
+
+invalid_version_fixture="$temp_dir/invalid-version"
+create_version_fixture "$invalid_version_fixture"
+printf '1.15.8\nextra\n' > "$invalid_version_fixture/.terraform-version"
+expect_fixture_failure "exactly one non-empty line" "$invalid_version_fixture"
 
 printf 'Terraform wrapper tests passed.\n'

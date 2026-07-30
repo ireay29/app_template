@@ -6,4 +6,8 @@ if [ "${1:-}" = "version" ]; then
   exit 0
 fi
 
-printf '%s\n' "$*" > "${FAKE_TERRAFORM_LOG:?FAKE_TERRAFORM_LOG is required}"
+: > "${FAKE_TERRAFORM_LOG:?FAKE_TERRAFORM_LOG is required}"
+for argument in "$@"; do
+  printf '%s\n' "$argument" >> "$FAKE_TERRAFORM_LOG"
+done
+exit "${FAKE_TERRAFORM_EXIT:-0}"
