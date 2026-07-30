@@ -40,6 +40,24 @@ blob-report/
 supabase/.branches/
 supabase/.temp/
 
+# Terraform local state and credentials
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+*.tfplan
+*.tfvars
+*.tfvars.json
+backend.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+crash.log
+crash.*.log
+
 # Logs
 logs/
 *.log

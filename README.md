@@ -132,6 +132,7 @@ The web app proxies `/api/*` to the API server during local development.
 - Provider-neutral deployment contract: `docs/deployment-contract.md`
 - Vercel + Supabase verification guide: `docs/vercel-supabase.md`
 - Runtime adapter boundaries: `docs/runtime-adapters.md`
+- Terraform scaffold and stack guide: `infra/terraform/README.md`
 - API container build: `Dockerfile.api`
 - Kubernetes examples: `deploy/k8s/example`
 
@@ -139,6 +140,17 @@ The API container is the portable production baseline for AWS ECS/Fargate,
 Alibaba ACK, Kubernetes, or VM-like targets. The Web app remains a static build
 under `apps/web/dist` and can be served by a CDN, static hosting, or a separate
 container depending on product requirements.
+
+Terraform is an independent platform-side verification gate. The repository
+pins the CLI through `.terraform-version`, keeps Alibaba Cloud examples under
+`infra/terraform`, and does not select a production provider or run `apply`
+automatically.
+
+```sh
+pnpm terraform:fmt
+pnpm terraform:wrapper:test
+pnpm terraform:check
+```
 
 ## Implementation Guide
 
