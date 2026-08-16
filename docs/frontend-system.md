@@ -22,6 +22,7 @@ while still allowing MUI where it provides real leverage.
 | Typed API client        | `apps/web/src/lib/api/client.ts`                    |
 | Typed API query bridge  | `apps/web/src/lib/api/query.ts`                     |
 | Protected route guard   | `apps/web/src/features/auth/ProtectedRoute.tsx`     |
+| Route access policy     | `apps/web/src/routes/route-access.tsx`              |
 
 `DesignSystemProvider` wraps the app with MUI `ThemeProvider` and
 `CssBaseline`. Tailwind CSS variables define the shadcn/ui-compatible color,
@@ -100,7 +101,14 @@ presentation stay separate.
 
 ## Auth UI Rules
 
-- Use `ProtectedRoute` for pages that require a signed-in user.
+- Declare every route's access requirement with `handle: { access }` in
+  `apps/web/src/routes/router.tsx`. Available levels are `public`,
+  `authenticated`, and `admin`.
+- Keep URLs independent from access requirements. Promote a route from
+  `public` to `authenticated` by changing its access metadata, rather than
+  moving it to a different path.
+- `RouteAccessGuard` delegates authenticated and admin routes to
+  `ProtectedRoute`; public routes render without a session check.
 - Keep role enforcement in the API. UI checks are only a convenience.
 - Use admin-only API calls, such as `/api/admin/summary`, to prove role-specific
   access paths.
