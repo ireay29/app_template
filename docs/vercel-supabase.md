@@ -72,6 +72,11 @@ The repository includes `vercel.json` for a root Vercel project:
 - API Functions: root `api/[...route].ts`
 - SPA fallback: all non-API paths rewrite to `/index.html`
 
+Use a patched Node.js release within the supported major lines in
+`package.json`. Vercel manages minor/patch rollouts; `pnpm build` prints the
+build runtime version. Check runtime logs too, and redeploy existing services
+after dependency updates. See `docs/security-maintenance.md`.
+
 Set these environment variables in Vercel preview/production:
 
 - `DATABASE_URL`

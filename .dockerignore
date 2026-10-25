@@ -10,6 +10,10 @@ playwright-report
 **/playwright-report
 .git
 .vercel
+.aws
+.agents
+.codex
+infra
 .env
 .env.*
 !.env.example

@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { app, createApp } from './app.js';
+import { env } from './config/env.js';
 import { closeDatabase } from './db/client.js';
 import { createUsersService } from './users/users-service.js';
 
@@ -72,6 +73,22 @@ describe('api app', () => {
       status: 'ok',
       service: 'api',
     });
+  });
+
+  it('uses a fixed CORS header allowlist instead of reflecting requested headers', async () => {
+    const response = await app.request('/api/notes', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: env.WEB_ORIGIN,
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'content-type,x-untrusted-header',
+      },
+    });
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get('access-control-allow-origin')).toBe(env.WEB_ORIGIN);
+    expect(response.headers.get('access-control-allow-credentials')).toBe('true');
+    expect(response.headers.get('access-control-allow-headers')).toBe('Content-Type,Authorization');
   });
 
   it('returns readiness status', async () => {

@@ -14,6 +14,10 @@ A TypeScript app template with a Vite React frontend and a Hono API backend.
 
 ## Commands
 
+Use a patched Node.js release: 22.23.4+, 24.22.1+, or 26.12.1+ within those
+major release lines. `.node-version` selects the Node 22 baseline, and pnpm
+rejects unsupported engines.
+
 ```sh
 pnpm install
 pnpm exec playwright install chromium
@@ -58,6 +62,7 @@ pnpm test:ui:api
 pnpm build
 pnpm test:e2e
 pnpm check
+pnpm security:audit
 ```
 
 The DB-backed commands (`pnpm test`, `pnpm test:coverage`, `pnpm check`, and
@@ -173,3 +178,7 @@ pnpm terraform:check
 GitHub Actions runs `pnpm ci` on Node.js 22.x and 24.x. The CI job starts a
 PostgreSQL service, migrates and seeds the database, installs Playwright
 Chromium, and runs the full local check.
+
+Dependency auditing also runs daily and on pull requests without installing
+dependencies. Dependabot opens weekly updates for npm, GitHub Actions, and
+Docker. See `docs/security-maintenance.md` for update and deployment checks.

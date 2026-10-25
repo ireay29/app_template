@@ -23,6 +23,7 @@ export function createApp(dependencies: AppDependencies = createDefaultAppDepend
     cors({
       origin: webOrigins,
       credentials: true,
+      allowHeaders: ['Content-Type', 'Authorization'],
     }),
   );
 
