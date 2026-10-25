@@ -7,7 +7,10 @@
 - The daily `Dependency security` workflow audits the lockfile without
   installing packages. The full CI gate also audits dependencies.
 - Dependabot checks npm, GitHub Actions, and Docker weekly. Better Auth and
-  Vitest packages are grouped so companion packages can be reviewed together.
+  Vitest packages have separate version-update and security-update groups so
+  companion packages can be reviewed together in either case.
+- Jest DOM stays on 6.9.1. Dependabot excludes the deprecated 6.10.0 release
+  with unintended breaking changes; a deliberate upgrade to 7.x remains possible.
 - pnpm enforces a one-day minimum release age; normal Dependabot npm updates
   use a three-day cooldown. These reduce exposure to newly poisoned releases
   but do not prove a package is safe. Review provenance and release notes.
