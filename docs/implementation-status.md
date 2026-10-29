@@ -11,7 +11,10 @@ quickly.
 - `apps/api`: Hono, Zod OpenAPI routes, Swagger UI, Better Auth, PostgreSQL,
   and Drizzle ORM.
 - `e2e`: Playwright coverage for the dashboard, API health state, sign-up,
-  authenticated note creation, sign-out, and admin/member authorization.
+  authenticated note creation, sign-out, admin/member authorization, maintenance
+  notices, recovery, and static maintenance/robots assets.
+- Maintenance: `off`, `read-only`, and `full` modes with API enforcement, public
+  status, shared Web notices, and static assets for delivery-layer HTTP 503.
 - `.github/workflows/ci.yml`: CI on Node.js 22.x and 24.x with PostgreSQL,
   migrations, Playwright browser install, and `pnpm ci`.
 - `api/[...route].ts`: Vercel Functions entrypoint that reuses the Hono app.
@@ -24,49 +27,60 @@ quickly.
 
 ## Feature Map
 
-| Area                | Entry Point                                       | Notes                                                              |
-| ------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
-| Web shell           | `apps/web/src/App.tsx`                            | Shows API health, design-system examples, and the auth notes demo. |
-| Auth demo UI        | `apps/web/src/features/auth/AuthNotesDemo.tsx`    | Presentation for sign-up, sign-in, sign-out, and note creation.    |
-| Auth demo state     | `apps/web/src/features/auth/useAuthNotesDemo.ts`  | Session, form, feedback orchestration, and note side effects.      |
-| Auth demo support   | `apps/web/src/features/auth/auth-notes-demo-*.ts` | Demo form schemas, query keys, submit state, and messages.         |
-| Protected route     | `apps/web/src/features/auth/ProtectedRoute.tsx`   | Authenticated and role-aware page guard for React Router routes.   |
-| Admin page          | `apps/web/src/pages/admin/AdminPage.tsx`          | Protected page and admin-only API example.                         |
-| Web API helpers     | `apps/web/src/lib/api`                            | Generated-client helpers and TanStack Query bridge.                |
-| Generated API types | `apps/web/src/generated/openapi.ts`               | Generated from the Hono OpenAPI document; do not edit by hand.     |
-| Typed API client    | `apps/web/src/lib/api/client.ts`                  | `openapi-fetch` client configured for same-origin API calls.       |
-| Typed API queries   | `apps/web/src/lib/api/query.ts`                   | `openapi-react-query` bridge for TanStack Query usage.             |
-| Auth client         | `apps/web/src/lib/auth-client.ts`                 | Better Auth React client.                                          |
-| API app             | `apps/api/src/app.ts`                             | Hono app wiring, middleware, dependency setup, and error handling. |
-| Node runtime        | `apps/api/src/index.ts`                           | Node/container listen and graceful shutdown handling.              |
-| Vercel runtime      | `api/[...route].ts`                               | Vercel Functions handler exports.                                  |
-| API route wiring    | `apps/api/src/app-routes.ts`                      | Registers OpenAPI route handlers and docs.                         |
-| API dependencies    | `apps/api/src/app-dependencies.ts`                | Default dependency composition for auth, DB health, and notes.     |
-| Auth server         | `apps/api/src/auth/auth.ts`                       | Better Auth with the Drizzle adapter.                              |
-| Session middleware  | `apps/api/src/middleware/session.ts`              | Loads the Better Auth session into Hono context.                   |
-| Notes domain        | `apps/api/src/notes`                              | Notes service and repository boundary.                             |
-| Users domain        | `apps/api/src/users`                              | User lookup and role updates for authz and seed scripts.           |
-| API presenters      | `apps/api/src/http/presenters.ts`                 | Converts domain/session records into API response shapes.          |
-| Database schema     | `apps/api/src/db/schema`                          | Better Auth tables and the `notes` table.                          |
-| Migrations          | `apps/api/drizzle`                                | Initial Drizzle migration and metadata.                            |
-| Seed data           | `apps/api/src/scripts/seed.ts`                    | Local admin/member users and demo notes; refuses production.       |
-| Deploy contract     | `docs/deployment-contract.md`                     | Provider-neutral runtime, DB, health, and migration contract.      |
-| Vercel/Supabase     | `docs/vercel-supabase.md`                         | Verification stack setup and commands.                             |
-| Runtime adapters    | `docs/runtime-adapters.md`                        | Runtime boundary rules for Node, Vercel, and future adapters.      |
-| Terraform scaffold  | `infra/terraform/README.md`                       | Stack layout, backend, credential, and provider-neutrality rules.  |
-| Terraform checks    | `scripts/terraform-check.sh`                      | Independent fmt, wrapper, init, and validate gate.                 |
+| Area                | Entry Point                                       | Notes                                                                                  |
+| ------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Web shell           | `apps/web/src/App.tsx`                            | Wraps the router in the maintenance boundary and shows the demo app.                   |
+| Auth demo UI        | `apps/web/src/features/auth/AuthNotesDemo.tsx`    | Presentation for sign-up, sign-in, sign-out, and note creation.                        |
+| Auth demo state     | `apps/web/src/features/auth/useAuthNotesDemo.ts`  | Session, form, feedback orchestration, and note side effects.                          |
+| Auth demo support   | `apps/web/src/features/auth/auth-notes-demo-*.ts` | Demo form schemas, query keys, submit state, and messages.                             |
+| Protected route     | `apps/web/src/features/auth/ProtectedRoute.tsx`   | Authenticated and role-aware page guard for React Router routes.                       |
+| Admin page          | `apps/web/src/pages/admin/AdminPage.tsx`          | Protected page and admin-only API example.                                             |
+| Web API helpers     | `apps/web/src/lib/api`                            | Generated-client helpers and TanStack Query bridge.                                    |
+| Generated API types | `apps/web/src/generated/openapi.ts`               | Generated from the Hono OpenAPI document; do not edit by hand.                         |
+| Typed API client    | `apps/web/src/lib/api/client.ts`                  | `openapi-fetch` client configured for same-origin API calls.                           |
+| Typed API queries   | `apps/web/src/lib/api/query.ts`                   | `openapi-react-query` bridge for TanStack Query usage.                                 |
+| Auth client         | `apps/web/src/lib/auth-client.ts`                 | Better Auth React client.                                                              |
+| API app             | `apps/api/src/app.ts`                             | Hono app wiring, middleware, dependency setup, and error handling.                     |
+| Node runtime        | `apps/api/src/index.ts`                           | Node/container listen and graceful shutdown handling.                                  |
+| Vercel runtime      | `api/[...route].ts`                               | Vercel Functions handler exports.                                                      |
+| API route wiring    | `apps/api/src/app-routes.ts`                      | Registers OpenAPI route handlers and docs.                                             |
+| API dependencies    | `apps/api/src/app-dependencies.ts`                | Default dependency composition for auth, DB health, and notes.                         |
+| Auth server         | `apps/api/src/auth/auth.ts`                       | Better Auth with the Drizzle adapter.                                                  |
+| Session middleware  | `apps/api/src/middleware/session.ts`              | Loads the Better Auth session into Hono context.                                       |
+| Maintenance config  | `apps/api/src/config/maintenance.ts`              | Validates modes, public message, retry delay, estimated end, and status URL.           |
+| Maintenance guard   | `apps/api/src/middleware/maintenance.ts`          | Rejects restricted requests with uncached JSON 503 before session and handlers.        |
+| Maintenance API     | `apps/api/src/routes/maintenance.ts`              | Public status contract and shared maintenance 503 response schema.                     |
+| Maintenance UI      | `apps/web/src/features/maintenance`               | Polls public status, shows the common notice, and controls demo mutation availability. |
+| Maintenance assets  | `apps/web/public`                                 | Self-contained maintenance HTML and a public-site robots.txt baseline.                 |
+| Maintenance runbook | `docs/maintenance.md`                             | API settings, delivery-layer HTTP 503 requirements, and recovery checks.               |
+| Notes domain        | `apps/api/src/notes`                              | Notes service and repository boundary.                                                 |
+| Users domain        | `apps/api/src/users`                              | User lookup and role updates for authz and seed scripts.                               |
+| API presenters      | `apps/api/src/http/presenters.ts`                 | Converts domain/session records into API response shapes.                              |
+| Database schema     | `apps/api/src/db/schema`                          | Better Auth tables and the `notes` table.                                              |
+| Migrations          | `apps/api/drizzle`                                | Initial Drizzle migration and metadata.                                                |
+| Seed data           | `apps/api/src/scripts/seed.ts`                    | Local admin/member users and demo notes; refuses production.                           |
+| Deploy contract     | `docs/deployment-contract.md`                     | Provider-neutral runtime, DB, health, and migration contract.                          |
+| Vercel/Supabase     | `docs/vercel-supabase.md`                         | Verification stack setup and commands.                                                 |
+| Runtime adapters    | `docs/runtime-adapters.md`                        | Runtime boundary rules for Node, Vercel, and future adapters.                          |
+| Terraform scaffold  | `infra/terraform/README.md`                       | Stack layout, backend, credential, and provider-neutrality rules.                      |
+| Terraform checks    | `scripts/terraform-check.sh`                      | Independent fmt, wrapper, init, and validate gate.                                     |
 
 ## Runtime Flow
 
 1. The web app runs on `http://localhost:3000`.
-2. Vite proxies `/api/*` to the Hono API on `http://localhost:8787`.
+2. Vite proxies `/api/*` to the Hono API on `http://localhost:8787` by default;
+   the proxy follows `PORT` when it is set in the process environment.
 3. Better Auth is mounted at `/api/auth/*`.
-4. Protected routes use `sessionContext` and return `401` when no session is
-   present.
+4. The maintenance guard runs before session and handler execution. When the
+   request is allowed, protected routes use `sessionContext` and return `401`
+   when no session is present.
 5. Admin-only routes return `403` unless the current user has the `admin` role.
 6. Authenticated notes are stored in PostgreSQL through Drizzle ORM.
 7. `GET /api/health` is database-free liveness.
 8. `GET /api/ready` is database-backed readiness.
+9. `GET /api/maintenance` is public, uncached status in every mode. The Web
+   polls it and disables demo mutation actions during maintenance. Full mode
+   also replaces the delivered SPA content with a maintenance notice.
 
 ## Local Setup
 
@@ -192,5 +206,8 @@ configuration.
   DB, API, and web integration path.
 - Production infrastructure provider is intentionally not selected. The
   template provides a provider-neutral deployment contract and examples only.
+- API maintenance settings require an API restart/redeploy. Static Web HTTP
+  503 requires a separate platform delivery switch; API full mode alone does
+  not change Web response statuses. See `docs/maintenance.md`.
 - Terraform CLI is pinned to `1.15.8`; the Alibaba Cloud provider scaffold is an
   example and does not select Alibaba Cloud as the production provider.

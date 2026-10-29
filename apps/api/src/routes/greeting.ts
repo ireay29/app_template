@@ -1,5 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
+import { maintenanceUnavailableResponse } from './maintenance.js';
+
 const greetingQuerySchema = z.object({
   name: z.string().min(1).optional().openapi({
     example: 'Avery',
@@ -19,6 +21,7 @@ export const greetingRoute = createRoute({
     query: greetingQuerySchema,
   },
   responses: {
+    503: maintenanceUnavailableResponse,
     200: {
       content: {
         'application/json': {

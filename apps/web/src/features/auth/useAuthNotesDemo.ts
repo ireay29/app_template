@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 
+import { MaintenanceModeContext } from '@/features/maintenance/maintenance-context';
 import { createNote, type DemoNote, getNotes } from '@/lib/api/notes';
 import { authClient } from '@/lib/auth-client';
 import { getErrorMessage } from '@/lib/errors';
@@ -28,6 +29,7 @@ export type { Feedback, SubmitAction } from './auth-notes-demo-state';
 const demoEmail = `demo-${Math.random().toString(36).slice(2, 8)}@example.com`;
 
 export function useAuthNotesDemo() {
+  const isReadOnly = useContext(MaintenanceModeContext) !== 'off';
   const queryClient = useQueryClient();
   const { data: session, isPending: isSessionPending, refetch } = authClient.useSession();
   const [feedback, setFeedback] = useState<Feedback>({ type: 'idle' });
@@ -109,6 +111,11 @@ export function useAuthNotesDemo() {
   }
 
   async function runWithFeedback(action: () => Promise<void>, success: string, error: string) {
+    if (isReadOnly) {
+      setFeedback({ type: 'error', message: 'メンテナンス中のため、操作を一時停止しています。' });
+      return;
+    }
+
     setFeedback({ type: 'idle' });
 
     try {
@@ -184,6 +191,7 @@ export function useAuthNotesDemo() {
     handleSignOut,
     handleSignUp,
     isPending: isSessionPending,
+    isReadOnly,
     noteForm,
     notes: signedIn ? (notesQuery.data ?? []) : [],
     notesQuery,

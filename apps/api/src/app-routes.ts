@@ -2,6 +2,7 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 import type { AppDependencies } from './app-dependencies.js';
+import type { MaintenanceSettings } from './config/maintenance.js';
 import {
   forbiddenBody,
   toMeResponse,
@@ -12,6 +13,7 @@ import { requireAuth } from './middleware/session.js';
 import { adminSummaryRoute } from './routes/admin.js';
 import { greetingRoute } from './routes/greeting.js';
 import { healthRoute, readyRoute } from './routes/health.js';
+import { maintenanceRoute } from './routes/maintenance.js';
 import { meRoute } from './routes/me.js';
 import { createNoteRoute, getNotesRoute } from './routes/notes.js';
 import type { AppEnv } from './types.js';
@@ -30,7 +32,16 @@ async function getDatabaseStatus(
   }
 }
 
-export function registerSystemRoutes(app: AppInstance, dependencies: AppDependencies) {
+export function registerSystemRoutes(
+  app: AppInstance,
+  dependencies: AppDependencies,
+  maintenance: MaintenanceSettings,
+) {
+  app.openapi(maintenanceRoute, (c) => {
+    c.header('Cache-Control', 'no-store');
+    return c.json(maintenance, 200);
+  });
+
   app.openapi(healthRoute, async (c) => {
     return c.json({
       status: 'ok',
@@ -59,9 +70,12 @@ export function registerSystemRoutes(app: AppInstance, dependencies: AppDependen
     const query = c.req.valid('query');
     const name = query.name ?? 'friend';
 
-    return c.json({
-      message: `Hello, ${name}.`,
-    });
+    return c.json(
+      {
+        message: `Hello, ${name}.`,
+      },
+      200,
+    );
   });
 }
 

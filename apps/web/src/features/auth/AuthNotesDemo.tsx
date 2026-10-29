@@ -30,7 +30,7 @@ export function AuthNotesDemo() {
           />
         ) : model.signedIn ? (
           <Button
-            disabled={model.submitting === 'signout'}
+            disabled={model.isReadOnly || model.submitting === 'signout'}
             onClick={model.handleSignOut}
             size="sm"
             type="button"
@@ -50,7 +50,7 @@ export function AuthNotesDemo() {
 }
 
 function AuthForm({ model }: { model: AuthNotesDemoModel }) {
-  const disabled = model.submitting !== null || model.isPending;
+  const disabled = model.isReadOnly || model.submitting !== null || model.isPending;
   const {
     formState: { errors },
     handleSubmit,
@@ -101,13 +101,22 @@ function NotesPanel({ model }: { model: AuthNotesDemoModel }) {
     <div className="space-y-4">
       <form className="space-y-3" onSubmit={handleSubmit(model.handleCreateNote)}>
         <FormField error={errors.title?.message} label="Note title">
-          <TextInput disabled={!model.signedIn} maxLength={120} {...register('title')} />
+          <TextInput
+            disabled={model.isReadOnly || !model.signedIn}
+            maxLength={120}
+            {...register('title')}
+          />
         </FormField>
         <FormField error={errors.body?.message} label="Body">
-          <TextArea disabled={!model.signedIn} {...register('body')} />
+          <TextArea disabled={model.isReadOnly || !model.signedIn} {...register('body')} />
         </FormField>
         <Button
-          disabled={!model.signedIn || model.submitting !== null || title.trim().length === 0}
+          disabled={
+            model.isReadOnly ||
+            !model.signedIn ||
+            model.submitting !== null ||
+            title.trim().length === 0
+          }
           type="submit"
         >
           <Plus aria-hidden="true" />

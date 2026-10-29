@@ -137,6 +137,7 @@ The web app proxies `/api/*` to the API server during local development.
 - Provider-neutral deployment contract: `docs/deployment-contract.md`
 - Vercel + Supabase verification guide: `docs/vercel-supabase.md`
 - Runtime adapter boundaries: `docs/runtime-adapters.md`
+- Maintenance modes, static 503 assets, and delivery runbook: `docs/maintenance.md`
 - Terraform scaffold and stack guide: `infra/terraform/README.md`
 - API container build: `Dockerfile.api`
 - Kubernetes examples: `deploy/k8s/example`

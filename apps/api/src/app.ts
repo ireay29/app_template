@@ -10,11 +10,16 @@ import {
   registerOpenApiDocs,
   registerSystemRoutes,
 } from './app-routes.js';
-import { webOrigins } from './config/env.js';
+import { env, webOrigins } from './config/env.js';
+import { getMaintenanceSettings, type MaintenanceSettings } from './config/maintenance.js';
+import { maintenanceGuard } from './middleware/maintenance.js';
 import { sessionContext } from './middleware/session.js';
 import type { AppEnv } from './types.js';
 
-export function createApp(dependencies: AppDependencies = createDefaultAppDependencies()) {
+export function createApp(
+  dependencies: AppDependencies = createDefaultAppDependencies(),
+  maintenance: MaintenanceSettings = getMaintenanceSettings(env),
+) {
   const app = new OpenAPIHono<AppEnv>();
 
   app.use('*', timing());
@@ -24,8 +29,11 @@ export function createApp(dependencies: AppDependencies = createDefaultAppDepend
       origin: webOrigins,
       credentials: true,
       allowHeaders: ['Content-Type', 'Authorization'],
+      exposeHeaders: ['Retry-After'],
     }),
   );
+
+  app.use('/api/*', maintenanceGuard(maintenance));
 
   app.use('/api/me', sessionContext);
   app.use('/api/admin/*', sessionContext);
@@ -34,7 +42,7 @@ export function createApp(dependencies: AppDependencies = createDefaultAppDepend
 
   registerAuthRoutes(app, dependencies);
   registerAdminRoutes(app, dependencies);
-  registerSystemRoutes(app, dependencies);
+  registerSystemRoutes(app, dependencies, maintenance);
   registerNotesRoutes(app, dependencies);
   registerOpenApiDocs(app);
 

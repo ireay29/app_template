@@ -1,6 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
 import { unauthorizedResponseSchema, userRoleSchema } from './auth-responses.js';
+import { maintenanceUnavailableResponse } from './maintenance.js';
 
 const userSchema = z.object({
   id: z.string().openapi({ example: 'user_123' }),
@@ -24,6 +25,7 @@ export const meRoute = createRoute({
   method: 'get',
   path: '/api/me',
   responses: {
+    503: maintenanceUnavailableResponse,
     200: {
       content: {
         'application/json': {

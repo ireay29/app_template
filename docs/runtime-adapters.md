@@ -20,10 +20,17 @@ depend on Vercel, Supabase, AWS, Alibaba Cloud, Kubernetes, or Docker APIs.
 
 ### Node / Container
 
-The container runtime runs:
+From the repository root, the Node runtime runs:
 
 ```sh
 node apps/api/dist/index.js
+```
+
+The `Dockerfile.api` runtime stage packages the API directly into `/app` and
+runs the following command from that directory:
+
+```sh
+node dist/index.js
 ```
 
 It listens on `HOST` and `PORT`, logs to stdout/stderr, and closes the database

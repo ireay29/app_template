@@ -1,5 +1,6 @@
 import { createApp } from '../app.js';
 import type { AppDependencies } from '../app-dependencies.js';
+import { getMaintenanceSettings } from '../config/maintenance.js';
 
 const schemaOnlyDependencies: AppDependencies = {
   async checkDatabase() {
@@ -29,7 +30,7 @@ const schemaOnlyDependencies: AppDependencies = {
   },
 };
 
-const app = createApp(schemaOnlyDependencies);
+const app = createApp(schemaOnlyDependencies, getMaintenanceSettings());
 const response = await app.request('/api/openapi.json');
 
 if (!response.ok) {

@@ -1,6 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
 import { unauthorizedResponseSchema } from './auth-responses.js';
+import { maintenanceUnavailableResponse } from './maintenance.js';
 
 export const noteSchema = z.object({
   id: z.string().uuid().openapi({ example: '01234567-89ab-cdef-0123-456789abcdef' }),
@@ -23,6 +24,7 @@ export const getNotesRoute = createRoute({
   method: 'get',
   path: '/api/notes',
   responses: {
+    503: maintenanceUnavailableResponse,
     200: {
       content: {
         'application/json': {
@@ -57,6 +59,7 @@ export const createNoteRoute = createRoute({
     },
   },
   responses: {
+    503: maintenanceUnavailableResponse,
     201: {
       content: {
         'application/json': {
