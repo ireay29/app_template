@@ -97,6 +97,9 @@ pnpm db:reset
   auth cookies work through the local `/api/*` proxy.
 - Better Auth is mounted at `/api/auth/*`.
 - Protected API calls must include cookies with `credentials: "include"`.
+- API endpoints declare `public`, `authenticated`, or `admin` access through
+  the common route registrar. Undeclared routes are rejected. See
+  `docs/authorization.md` for registration and resource ownership rules.
 - Better Auth origin checks are enforced in production. Local development and
   tests disable the origin check because Vite proxy ports are intentionally
   configurable.

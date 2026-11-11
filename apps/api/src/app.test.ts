@@ -3,58 +3,10 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { app, createApp } from './app.js';
 import { env } from './config/env.js';
 import { closeDatabase } from './db/client.js';
+import { authHeaders, signUp } from './test/auth-client.js';
 import { createUsersService } from './users/users-service.js';
 
 const usersService = createUsersService();
-
-function authHeaders(cookie?: string) {
-  return {
-    'Content-Type': 'application/json',
-    Origin: 'http://localhost:3000',
-    ...(cookie ? { Cookie: cookie } : {}),
-  };
-}
-
-function getCookieHeader(response: Response) {
-  const setCookie = response.headers.get('set-cookie');
-
-  if (!setCookie) {
-    throw new Error('Expected an auth cookie.');
-  }
-
-  return setCookie
-    .split(/,(?=\s*[^;,]+=)/)
-    .map((cookie) => {
-      const [nameValue] = cookie.split(';');
-
-      if (!nameValue) {
-        throw new Error('Expected a cookie name and value.');
-      }
-
-      return nameValue;
-    })
-    .join('; ');
-}
-
-async function signUp() {
-  const email = `api-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
-  const response = await app.request('/api/auth/sign-up/email', {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify({
-      email,
-      name: 'API Test User',
-      password: 'password1234',
-    }),
-  });
-
-  expect(response.status).toBe(200);
-
-  return {
-    cookie: getCookieHeader(response),
-    email,
-  };
-}
 
 describe('api app', () => {
   afterAll(async () => {
@@ -113,6 +65,7 @@ describe('api app', () => {
         throw new Error('database unavailable');
       },
       handleAuth: () => new Response(null, { status: 404 }),
+      getSession: async () => null,
       notesService: {
         createForUser: async () => {
           throw new Error('not implemented');
@@ -173,7 +126,7 @@ describe('api app', () => {
   });
 
   it('returns the current user and creates notes with a session cookie', async () => {
-    const { cookie, email } = await signUp();
+    const { cookie, email } = await signUp(app);
 
     const meResponse = await app.request('/api/me', {
       headers: authHeaders(cookie),
@@ -236,5 +189,74 @@ describe('api app', () => {
         }),
       ]),
     );
+  });
+
+  it('keeps notes scoped to the authenticated owner even after another user becomes admin', async () => {
+    const owner = await signUp(app);
+    const other = await signUp(app);
+    const ownerRecord = await usersService.findByEmail(owner.email);
+    const otherRecord = await usersService.findByEmail(other.email);
+    if (!ownerRecord || !otherRecord) throw new Error('Expected both test accounts.');
+
+    const created = await app.request('/api/notes', {
+      method: 'POST',
+      headers: authHeaders(owner.cookie),
+      body: JSON.stringify({ title: 'Private owner note', userId: otherRecord.id }),
+    });
+    expect(created.status).toBe(201);
+    const { note } = (await created.json()) as { note: { id: string } };
+    expect(note.id).toEqual(expect.any(String));
+
+    const ownNotes = await app.request('/api/notes', { headers: authHeaders(owner.cookie) });
+    expect(await ownNotes.json()).toMatchObject({
+      notes: expect.arrayContaining([expect.objectContaining({ id: note.id })]),
+    });
+
+    for (const role of ['member', 'admin'] as const) {
+      await usersService.updateRoleByEmail(other.email, role);
+      const response = await app.request(`/api/notes?userId=${ownerRecord.id}`, {
+        headers: authHeaders(other.cookie),
+      });
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as { notes: Array<{ id: string }> };
+      expect(body.notes.map((record) => record.id)).not.toContain(note.id);
+    }
+  });
+
+  it('revokes admin access immediately after demotion with the same session cookie', async () => {
+    const { cookie, email } = await signUp(app);
+    const request = () => app.request('/api/admin/summary', { headers: authHeaders(cookie) });
+    await usersService.updateRoleByEmail(email, 'admin');
+    expect((await request()).status).toBe(200);
+
+    await usersService.updateRoleByEmail(email, 'member');
+    expect((await request()).status).toBe(403);
+    const me = await app.request('/api/me', { headers: authHeaders(cookie) });
+    expect(me.status).toBe(200);
+    expect(await me.json()).toMatchObject({ user: { role: 'member' } });
+  });
+
+  it('rejects a saved session cookie after sign-out, including a protected write', async () => {
+    const { cookie, email } = await signUp(app);
+    await usersService.updateRoleByEmail(email, 'admin');
+    expect((await app.request('/api/admin/summary', { headers: authHeaders(cookie) })).status).toBe(
+      200,
+    );
+    const signedOut = await app.request('/api/auth/sign-out', {
+      method: 'POST',
+      headers: authHeaders(cookie),
+      body: '{}',
+    });
+    expect(signedOut.status).toBe(200);
+
+    for (const path of ['/api/me', '/api/notes', '/api/admin/summary']) {
+      expect((await app.request(path, { headers: authHeaders(cookie) })).status).toBe(401);
+    }
+    const write = await app.request('/api/notes', {
+      method: 'POST',
+      headers: authHeaders(cookie),
+      body: JSON.stringify({ title: 'Revoked' }),
+    });
+    expect(write.status).toBe(401);
   });
 });

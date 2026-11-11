@@ -1,10 +1,11 @@
+import { QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const authMock = vi.hoisted(() => ({
   session: {
-    data: null as { user: { id: string; email: string } } | null,
+    data: null as { user: { id: string; email: string }; session: { id: string } } | null,
     error: null as Error | null,
     isPending: false,
   },
@@ -12,7 +13,7 @@ const authMock = vi.hoisted(() => ({
 
 const apiMock = vi.hoisted(() => ({
   me: {
-    data: undefined as { user: { role: 'admin' | 'member' } } | undefined,
+    data: undefined as { user: { id: string; role: 'admin' | 'member' } } | undefined,
     error: null as Error | null,
     isError: false,
     isPending: false,
@@ -27,20 +28,24 @@ vi.mock('@/lib/auth-client', () => ({
 
 vi.mock('@/lib/api/query', () => ({
   apiQuery: {
-    useQuery: () => apiMock.me,
+    queryOptions: () => ({ queryKey: ['get', '/api/me'], queryFn: async () => apiMock.me.data }),
   },
 }));
+
+import { createAppQueryClient } from '@/lib/query-client';
 
 import { RouteAccessGuard } from './route-access';
 import { defineRoute } from './route-definition';
 
 function renderGuard(access: 'public' | 'authenticated' | 'admin') {
   return render(
-    <MemoryRouter>
-      <RouteAccessGuard access={access}>
-        <p>Route content</p>
-      </RouteAccessGuard>
-    </MemoryRouter>,
+    <QueryClientProvider client={createAppQueryClient()}>
+      <MemoryRouter>
+        <RouteAccessGuard access={access}>
+          <p>Route content</p>
+        </RouteAccessGuard>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
@@ -86,19 +91,25 @@ describe('RouteAccessGuard', () => {
   });
 
   it('renders authenticated routes for signed-in users', () => {
-    authMock.session.data = { user: { id: 'user_1', email: 'member@example.com' } };
+    authMock.session.data = {
+      user: { id: 'user_1', email: 'member@example.com' },
+      session: { id: 'session_1' },
+    };
 
     renderGuard('authenticated');
 
     expect(screen.getByText('Route content')).toBeInTheDocument();
   });
 
-  it('requires the admin role for admin routes', () => {
-    authMock.session.data = { user: { id: 'user_1', email: 'member@example.com' } };
-    apiMock.me.data = { user: { role: 'member' } };
+  it('requires the admin role for admin routes', async () => {
+    authMock.session.data = {
+      user: { id: 'user_1', email: 'member@example.com' },
+      session: { id: 'session_1' },
+    };
+    apiMock.me.data = { user: { id: 'user_1', role: 'member' } };
 
     renderGuard('admin');
 
-    expect(screen.getByRole('status')).toHaveTextContent('Admin access required');
+    expect(await screen.findByText('Admin access required')).toBeInTheDocument();
   });
 });

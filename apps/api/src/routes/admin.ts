@@ -1,6 +1,5 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
-import { forbiddenResponseSchema, unauthorizedResponseSchema } from './auth-responses.js';
 import { maintenanceUnavailableResponse } from './maintenance.js';
 
 const adminSummaryResponseSchema = z.object({
@@ -20,22 +19,6 @@ export const adminSummaryRoute = createRoute({
         },
       },
       description: 'Returns an admin-only API example response.',
-    },
-    401: {
-      content: {
-        'application/json': {
-          schema: unauthorizedResponseSchema,
-        },
-      },
-      description: 'Authentication is required.',
-    },
-    403: {
-      content: {
-        'application/json': {
-          schema: forbiddenResponseSchema,
-        },
-      },
-      description: 'The current user does not have the required role.',
     },
   },
   tags: ['Admin'],

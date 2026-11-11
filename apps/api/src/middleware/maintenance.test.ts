@@ -16,19 +16,15 @@ function createTestApp(mode: 'off' | 'read-only' | 'full') {
     MAINTENANCE_ENDS_AT: '2020-01-01T00:00:00Z',
   });
   const app = createApp({ ...createDefaultAppDependencies(), checkDatabase, handleAuth }, settings);
-  const mutate = vi.fn(() => new Response('updated'));
-  app.on(['POST', 'PUT', 'PATCH', 'DELETE'], '/api/mutation-probe', mutate);
-
-  return { app, checkDatabase, handleAuth, mutate, settings };
+  return { app, checkDatabase, handleAuth, settings };
 }
 
 describe('maintenance API boundary', () => {
   it('leaves authentication and writes available when off', async () => {
-    const { app, handleAuth, mutate } = createTestApp('off');
+    const { app, handleAuth } = createTestApp('off');
     expect((await app.request('/api/auth/sign-in/email', { method: 'POST' })).status).toBe(200);
-    expect((await app.request('/api/mutation-probe', { method: 'POST' })).status).toBe(200);
-    expect(handleAuth).toHaveBeenCalledOnce();
-    expect(mutate).toHaveBeenCalledOnce();
+    expect((await app.request('/api/auth/sign-out', { method: 'POST' })).status).toBe(200);
+    expect(handleAuth).toHaveBeenCalledTimes(2);
   });
 
   it.each(['off', 'read-only', 'full'] as const)(
@@ -59,8 +55,8 @@ describe('maintenance API boundary', () => {
   it.each(['POST', 'PUT', 'PATCH', 'DELETE'])(
     'blocks %s before mutation handlers',
     async (method) => {
-      const { app, mutate, settings } = createTestApp('read-only');
-      const response = await app.request('/api/mutation-probe', {
+      const { app, handleAuth, settings } = createTestApp('read-only');
+      const response = await app.request('/api/auth/sign-out', {
         method,
         headers: { Origin: env.WEB_ORIGIN },
       });
@@ -74,7 +70,7 @@ describe('maintenance API boundary', () => {
         code: 'MAINTENANCE',
         maintenance: settings,
       });
-      expect(mutate).not.toHaveBeenCalled();
+      expect(handleAuth).not.toHaveBeenCalled();
     },
   );
 

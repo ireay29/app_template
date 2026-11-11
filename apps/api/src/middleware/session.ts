@@ -1,27 +1,27 @@
-import type { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
 
-import { auth } from '../auth/auth.js';
-import type { AppEnv, AuthSession } from '../types.js';
+import type { AppDependencies } from '../app-dependencies.js';
+import { forbiddenBody, unauthorizedBody } from '../http/presenters.js';
+import type { RouteAccess } from '../http/route-access.js';
+import type { AppEnv } from '../types.js';
 
-export const sessionContext = createMiddleware<AppEnv>(async (c, next) => {
-  const authSession = await auth.api.getSession({
-    headers: c.req.raw.headers,
+export function authorize(access: RouteAccess, dependencies: AppDependencies) {
+  return createMiddleware<AppEnv>(async (c, next) => {
+    if (access === 'public') {
+      return next();
+    }
+
+    const authSession = await dependencies.getSession(c.req.raw.headers);
+    if (!authSession) {
+      return c.json(unauthorizedBody, 401);
+    }
+
+    const currentUser = await dependencies.usersService.requireById(authSession.user.id);
+    if (access === 'admin' && currentUser.role !== 'admin') {
+      return c.json(forbiddenBody, 403);
+    }
+
+    c.set('principal', { authSession, role: currentUser.role });
+    return next();
   });
-
-  c.set('user', authSession?.user ?? null);
-  c.set('session', authSession?.session ?? null);
-
-  await next();
-});
-
-export function requireAuth(c: Context<AppEnv>): AuthSession | null {
-  const user = c.get('user');
-  const session = c.get('session');
-
-  if (!user || !session) {
-    return null;
-  }
-
-  return { user, session };
 }

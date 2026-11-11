@@ -7,6 +7,9 @@ entrypoints.
 
 - `apps/api/src/app.ts`: Hono app wiring, middleware, route registration, and
   error handling.
+- `apps/api/src/http/route-registry.ts`: explicit API access declarations and
+  default-deny route registration. Keep this boundary in every runtime; see
+  `docs/authorization.md`.
 - `apps/api/src/index.ts`: Node/container server startup, bind address, port,
   and shutdown handling.
 - `api/[...route].ts`: Vercel Functions handler export.

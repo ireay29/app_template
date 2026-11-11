@@ -90,6 +90,7 @@ describe('AuthNotesDemo', () => {
   });
 
   it('creates a note for a signed-in user', async () => {
+    let saved = false;
     authMock.sessionState.data = {
       user: {
         id: 'user_123',
@@ -109,6 +110,7 @@ describe('AuthNotesDemo', () => {
         const method = input instanceof Request ? input.method : init?.method;
 
         if (method === 'POST') {
+          saved = true;
           return new Response(
             JSON.stringify({
               note: {
@@ -126,10 +128,25 @@ describe('AuthNotesDemo', () => {
           );
         }
 
-        return new Response(JSON.stringify({ notes: [] }), {
-          headers: { 'Content-Type': 'application/json' },
-          status: 200,
-        });
+        return new Response(
+          JSON.stringify({
+            notes: saved
+              ? [
+                  {
+                    id: '01234567-89ab-cdef-0123-456789abcdef',
+                    title: 'Created note',
+                    body: 'Saved in the test.',
+                    createdAt: '2026-06-30T00:00:00.000Z',
+                    updatedAt: '2026-06-30T00:00:00.000Z',
+                  },
+                ]
+              : [],
+          }),
+          {
+            headers: { 'Content-Type': 'application/json' },
+            status: 200,
+          },
+        );
       }),
     );
 

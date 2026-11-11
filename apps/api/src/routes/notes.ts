@@ -1,6 +1,5 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
-import { unauthorizedResponseSchema } from './auth-responses.js';
 import { maintenanceUnavailableResponse } from './maintenance.js';
 
 export const noteSchema = z.object({
@@ -33,14 +32,6 @@ export const getNotesRoute = createRoute({
       },
       description: 'Returns notes owned by the current user.',
     },
-    401: {
-      content: {
-        'application/json': {
-          schema: unauthorizedResponseSchema,
-        },
-      },
-      description: 'Authentication is required.',
-    },
   },
   tags: ['Notes'],
 });
@@ -67,14 +58,6 @@ export const createNoteRoute = createRoute({
         },
       },
       description: 'Creates a note owned by the current user.',
-    },
-    401: {
-      content: {
-        'application/json': {
-          schema: unauthorizedResponseSchema,
-        },
-      },
-      description: 'Authentication is required.',
     },
   },
   tags: ['Notes'],

@@ -9,6 +9,9 @@ const schemaOnlyDependencies: AppDependencies = {
   handleAuth() {
     return new Response(null, { status: 501 });
   },
+  async getSession() {
+    throw new Error('The OpenAPI schema export must not load sessions.');
+  },
   notesService: {
     async createForUser() {
       throw new Error('The OpenAPI schema export must not execute note mutations.');

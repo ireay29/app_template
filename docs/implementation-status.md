@@ -46,7 +46,9 @@ quickly.
 | API route wiring    | `apps/api/src/app-routes.ts`                      | Registers OpenAPI route handlers and docs.                                             |
 | API dependencies    | `apps/api/src/app-dependencies.ts`                | Default dependency composition for auth, DB health, and notes.                         |
 | Auth server         | `apps/api/src/auth/auth.ts`                       | Better Auth with the Drizzle adapter.                                                  |
-| Session middleware  | `apps/api/src/middleware/session.ts`              | Loads the Better Auth session into Hono context.                                       |
+| Session middleware  | `apps/api/src/middleware/session.ts`              | Enforces session and current role checks before protected handlers.                    |
+| API route access    | `apps/api/src/http/route-registry.ts`             | Requires explicit access, guards registered routes, and rejects undeclared handlers.   |
+| Authorization rules | `docs/authorization.md`                           | Access declarations, typed principals, ownership boundaries, and regression checks.    |
 | Maintenance config  | `apps/api/src/config/maintenance.ts`              | Validates modes, public message, retry delay, estimated end, and status URL.           |
 | Maintenance guard   | `apps/api/src/middleware/maintenance.ts`          | Rejects restricted requests with uncached JSON 503 before session and handlers.        |
 | Maintenance API     | `apps/api/src/routes/maintenance.ts`              | Public status contract and shared maintenance 503 response schema.                     |
@@ -72,8 +74,11 @@ quickly.
    the proxy follows `PORT` when it is set in the process environment.
 3. Better Auth is mounted at `/api/auth/*`.
 4. The maintenance guard runs before session and handler execution. When the
-   request is allowed, protected routes use `sessionContext` and return `401`
-   when no session is present.
+   request is allowed, the common registrar applies session and role checks;
+   protected routes return `401` when no session is present. Undeclared route
+   entries are rejected by the registry boundary before other middleware.
+   Pre-authorization middleware is a closed list inside the registry; additional
+   response middleware must declare access through the registrar.
 5. Admin-only routes return `403` unless the current user has the `admin` role.
 6. Authenticated notes are stored in PostgreSQL through Drizzle ORM.
 7. `GET /api/health` is database-free liveness.
@@ -175,7 +180,8 @@ configuration.
 ## Extension Points
 
 - Add new API route schemas under `apps/api/src/routes`, then register handlers
-  in `apps/api/src/app-routes.ts`.
+  through `RouteRegistrar` in `apps/api/src/app-routes.ts`, explicitly declaring
+  `public`, `authenticated`, or `admin`. Do not add raw Hono handlers.
 - Run `pnpm openapi:generate` after changing API route schemas and commit the
   updated `apps/web/src/generated/openapi.ts` file.
 - Keep role checks on the API side even when the UI also hides admin-only

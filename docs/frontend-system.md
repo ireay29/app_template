@@ -96,6 +96,10 @@ presentation stay separate.
 - Prefer `apps/web/src/lib/api/client.ts` and `apps/web/src/lib/api/query.ts`
   for new API calls.
 - Keep Better Auth calls on `apps/web/src/lib/auth-client.ts`.
+- Scope protected reads with `protectedQueryOptions` from
+  `apps/web/src/lib/api/protected-query.ts` and the current session identity.
+  `ProtectedQueryBoundary` cancels and removes previous identities' queries.
+  Keep public queries outside the protected query key namespace.
 - Keep hand-written fetch clients only for temporary bootstrap paths that are
   not yet covered by generated OpenAPI types.
 

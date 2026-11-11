@@ -4,7 +4,8 @@ import { useContext, useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 
 import { MaintenanceModeContext } from '@/features/maintenance/maintenance-context';
-import { createNote, type DemoNote, getNotes } from '@/lib/api/notes';
+import { createNote, getNotes } from '@/lib/api/notes';
+import { discardProtectedQueries, getProtectedQueryScope } from '@/lib/api/protected-query';
 import { authClient } from '@/lib/auth-client';
 import { getErrorMessage } from '@/lib/errors';
 
@@ -21,7 +22,6 @@ import {
   type Feedback,
   getNotesQueryKey,
   getPendingSubmitAction,
-  notesQueryRoot,
 } from './auth-notes-demo-state';
 
 export type { Feedback, SubmitAction } from './auth-notes-demo-state';
@@ -50,7 +50,7 @@ export function useAuthNotesDemo() {
     resolver: zodResolver(noteFormSchema),
   });
   const signedIn = Boolean(session?.user);
-  const currentNotesQueryKey = getNotesQueryKey(session?.user?.id);
+  const currentNotesQueryKey = getNotesQueryKey(getProtectedQueryScope(session));
   const userLabel = session?.user?.email ?? 'Signed out';
 
   const notesQuery = useQuery({
@@ -89,11 +89,10 @@ export function useAuthNotesDemo() {
         body: values.body.trim() || undefined,
         title: values.title.trim(),
       }),
-    onSuccess: (note) => {
-      queryClient.setQueryData<DemoNote[]>(currentNotesQueryKey, (current) => [
-        note,
-        ...(current ?? []),
-      ]);
+    onSuccess: async () => {
+      // Refetch instead of inserting a response that may belong to the session
+      // which started the mutation before an account switch.
+      await queryClient.invalidateQueries({ queryKey: currentNotesQueryKey });
       noteForm.reset({ body: '', title: '' });
     },
   });
@@ -106,7 +105,7 @@ export function useAuthNotesDemo() {
   });
 
   async function refreshSessionNotes() {
-    queryClient.removeQueries({ queryKey: notesQueryRoot });
+    discardProtectedQueries(queryClient);
     await refetch();
   }
 

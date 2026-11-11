@@ -5,15 +5,18 @@ import { ToastProvider } from '@/components/ui/toast';
 import { createAppQueryClient } from '@/lib/query-client';
 
 import { DesignSystemProvider } from './design-system-provider';
+import { ProtectedQueryBoundary } from './protected-query-boundary';
 
 export function AppProviders({ children }: PropsWithChildren) {
   const [queryClient] = useState(() => createAppQueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DesignSystemProvider>
-        <ToastProvider>{children}</ToastProvider>
-      </DesignSystemProvider>
+      <ProtectedQueryBoundary>
+        <DesignSystemProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </DesignSystemProvider>
+      </ProtectedQueryBoundary>
     </QueryClientProvider>
   );
 }

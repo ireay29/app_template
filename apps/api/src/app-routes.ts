@@ -1,24 +1,15 @@
 import { swaggerUI } from '@hono/swagger-ui';
-import { OpenAPIHono } from '@hono/zod-openapi';
 
 import type { AppDependencies } from './app-dependencies.js';
 import type { MaintenanceSettings } from './config/maintenance.js';
-import {
-  forbiddenBody,
-  toMeResponse,
-  toNoteResponse,
-  unauthorizedBody,
-} from './http/presenters.js';
-import { requireAuth } from './middleware/session.js';
+import { toMeResponse, toNoteResponse } from './http/presenters.js';
+import type { RouteRegistrar } from './http/route-registry.js';
 import { adminSummaryRoute } from './routes/admin.js';
 import { greetingRoute } from './routes/greeting.js';
 import { healthRoute, readyRoute } from './routes/health.js';
 import { maintenanceRoute } from './routes/maintenance.js';
 import { meRoute } from './routes/me.js';
 import { createNoteRoute, getNotesRoute } from './routes/notes.js';
-import type { AppEnv } from './types.js';
-
-type AppInstance = OpenAPIHono<AppEnv>;
 type DatabaseStatus = 'ok' | 'unavailable';
 
 async function getDatabaseStatus(
@@ -33,16 +24,16 @@ async function getDatabaseStatus(
 }
 
 export function registerSystemRoutes(
-  app: AppInstance,
+  app: RouteRegistrar,
   dependencies: AppDependencies,
   maintenance: MaintenanceSettings,
 ) {
-  app.openapi(maintenanceRoute, (c) => {
+  app.openapi(maintenanceRoute, 'public', (c) => {
     c.header('Cache-Control', 'no-store');
     return c.json(maintenance, 200);
   });
 
-  app.openapi(healthRoute, async (c) => {
+  app.openapi(healthRoute, 'public', async (c) => {
     return c.json({
       status: 'ok',
       service: 'api',
@@ -50,7 +41,7 @@ export function registerSystemRoutes(
     });
   });
 
-  app.openapi(readyRoute, async (c) => {
+  app.openapi(readyRoute, 'public', async (c) => {
     const database = await getDatabaseStatus(dependencies.checkDatabase);
     const body = {
       status: 'ok' as const,
@@ -66,7 +57,7 @@ export function registerSystemRoutes(
     return c.json(body, 200);
   });
 
-  app.openapi(greetingRoute, (c) => {
+  app.openapi(greetingRoute, 'public', (c) => {
     const query = c.req.valid('query');
     const name = query.name ?? 'friend';
 
@@ -79,66 +70,37 @@ export function registerSystemRoutes(
   });
 }
 
-export function registerAuthRoutes(app: AppInstance, dependencies: AppDependencies) {
-  app.all('/api/auth/*', (c) => dependencies.handleAuth(c.req.raw));
+export function registerAuthRoutes(app: RouteRegistrar, dependencies: AppDependencies) {
+  app.on('ALL', '/api/auth/*', 'public', (c) => dependencies.handleAuth(c.req.raw));
 
-  app.openapi(meRoute, async (c) => {
-    const authSession = requireAuth(c);
-
-    if (!authSession) {
-      return c.json(unauthorizedBody, 401);
-    }
-
-    const currentUser = await dependencies.usersService.requireById(authSession.user.id);
-
-    return c.json(toMeResponse(authSession, currentUser.role), 200);
+  app.openapi(meRoute, 'authenticated', async (c) => {
+    const { authSession, role } = c.get('principal');
+    return c.json(toMeResponse(authSession, role), 200);
   });
 }
 
-export function registerAdminRoutes(app: AppInstance, dependencies: AppDependencies) {
-  app.openapi(adminSummaryRoute, async (c) => {
-    const authSession = requireAuth(c);
-
-    if (!authSession) {
-      return c.json(unauthorizedBody, 401);
-    }
-
-    const currentUser = await dependencies.usersService.requireById(authSession.user.id);
-
-    if (currentUser.role !== 'admin') {
-      return c.json(forbiddenBody, 403);
-    }
-
+export function registerAdminRoutes(app: RouteRegistrar) {
+  app.openapi(adminSummaryRoute, 'admin', async (c) => {
     return c.json(
       {
         message: 'Admin API access granted.',
-        role: currentUser.role,
+        role: c.get('principal').role,
       },
       200,
     );
   });
 }
 
-export function registerNotesRoutes(app: AppInstance, dependencies: AppDependencies) {
-  app.openapi(getNotesRoute, async (c) => {
-    const authSession = requireAuth(c);
-
-    if (!authSession) {
-      return c.json(unauthorizedBody, 401);
-    }
-
+export function registerNotesRoutes(app: RouteRegistrar, dependencies: AppDependencies) {
+  app.openapi(getNotesRoute, 'authenticated', async (c) => {
+    const { authSession } = c.get('principal');
     const notes = await dependencies.notesService.listForUser(authSession.user.id);
 
     return c.json({ notes: notes.map(toNoteResponse) }, 200);
   });
 
-  app.openapi(createNoteRoute, async (c) => {
-    const authSession = requireAuth(c);
-
-    if (!authSession) {
-      return c.json(unauthorizedBody, 401);
-    }
-
+  app.openapi(createNoteRoute, 'authenticated', async (c) => {
+    const { authSession } = c.get('principal');
     const payload = c.req.valid('json');
     const note = await dependencies.notesService.createForUser(authSession.user.id, payload);
 
@@ -146,8 +108,8 @@ export function registerNotesRoutes(app: AppInstance, dependencies: AppDependenc
   });
 }
 
-export function registerOpenApiDocs(app: AppInstance) {
-  app.doc('/api/openapi.json', {
+export function registerOpenApiDocs(app: RouteRegistrar) {
+  app.document('/api/openapi.json', 'public', {
     openapi: '3.0.3',
     info: {
       title: 'App Template API',
@@ -155,8 +117,10 @@ export function registerOpenApiDocs(app: AppInstance) {
     },
   });
 
-  app.get(
+  app.on(
+    'GET',
     '/api/docs',
+    'public',
     swaggerUI({
       url: '/api/openapi.json',
     }),
