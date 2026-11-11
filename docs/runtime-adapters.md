@@ -7,6 +7,9 @@ entrypoints.
 
 - `apps/api/src/app.ts`: Hono app wiring, middleware, route registration, and
   error handling.
+- `apps/api/src/http/route-registry.ts`: explicit API access declarations and
+  default-deny route registration. Keep this boundary in every runtime; see
+  `docs/authorization.md`.
 - `apps/api/src/index.ts`: Node/container server startup, bind address, port,
   and shutdown handling.
 - `api/[...route].ts`: Vercel Functions handler export.
@@ -20,10 +23,17 @@ depend on Vercel, Supabase, AWS, Alibaba Cloud, Kubernetes, or Docker APIs.
 
 ### Node / Container
 
-The container runtime runs:
+From the repository root, the Node runtime runs:
 
 ```sh
 node apps/api/dist/index.js
+```
+
+The `Dockerfile.api` runtime stage packages the API directly into `/app` and
+runs the following command from that directory:
+
+```sh
+node dist/index.js
 ```
 
 It listens on `HOST` and `PORT`, logs to stdout/stderr, and closes the database

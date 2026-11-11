@@ -1,6 +1,9 @@
 set -eu
 
 test -f docs/deployment-contract.md
+test -f docs/maintenance.md
+test -f apps/web/public/maintenance.html
+test -f apps/web/public/robots.txt
 test -f docs/vercel-supabase.md
 test -f docs/runtime-adapters.md
 test -f .terraform-version

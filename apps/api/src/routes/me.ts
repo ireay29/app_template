@@ -1,6 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
-import { unauthorizedResponseSchema, userRoleSchema } from './auth-responses.js';
+import { userRoleSchema } from './auth-responses.js';
+import { maintenanceUnavailableResponse } from './maintenance.js';
 
 const userSchema = z.object({
   id: z.string().openapi({ example: 'user_123' }),
@@ -24,6 +25,7 @@ export const meRoute = createRoute({
   method: 'get',
   path: '/api/me',
   responses: {
+    503: maintenanceUnavailableResponse,
     200: {
       content: {
         'application/json': {
@@ -31,14 +33,6 @@ export const meRoute = createRoute({
         },
       },
       description: 'Returns the current authenticated user and session.',
-    },
-    401: {
-      content: {
-        'application/json': {
-          schema: unauthorizedResponseSchema,
-        },
-      },
-      description: 'Authentication is required.',
     },
   },
   tags: ['Auth'],

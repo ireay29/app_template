@@ -2,11 +2,14 @@ import 'dotenv/config';
 
 import { z } from 'zod';
 
+import { maintenanceEnvSchema } from './maintenance.js';
+
 const fallbackSecret = 'dev-secret-change-me-32-characters-min';
 const requiredProductionEnv = ['DATABASE_URL', 'BETTER_AUTH_URL', 'WEB_ORIGIN'] as const;
 
 const envSchema = z
   .object({
+    ...maintenanceEnvSchema.shape,
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     PORT: z.coerce.number().int().positive().default(8787),
     HOST: z.string().min(1).default('0.0.0.0'),

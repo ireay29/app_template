@@ -1,3 +1,5 @@
+import { getProtectedQueryKey } from '@/lib/api/protected-query';
+
 export type Feedback = { type: 'idle' } | { type: 'success' | 'error'; message: string };
 
 export type SubmitAction = 'signup' | 'signin' | 'note' | 'signout';
@@ -23,11 +25,10 @@ export const authMessages = {
 
 export const notesQueryRoot = ['notes'] as const;
 
-const signedOutNotesQueryKey = [...notesQueryRoot, 'signed-out'] as const;
 const submitActions = ['signup', 'signin', 'note', 'signout'] as const;
 
-export function getNotesQueryKey(userId?: string | null) {
-  return userId ? ([...notesQueryRoot, userId] as const) : signedOutNotesQueryKey;
+export function getNotesQueryKey(scope: string | null) {
+  return getProtectedQueryKey(scope, notesQueryRoot);
 }
 
 export function getPendingSubmitAction(states: Record<SubmitAction, boolean>): SubmitAction | null {

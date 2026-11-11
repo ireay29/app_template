@@ -17,6 +17,16 @@ describe('App', () => {
       vi.fn(async (input: RequestInfo | URL) => {
         const url = input instanceof Request ? input.url : String(input);
 
+        if (url.includes('/api/maintenance')) {
+          return Response.json({
+            mode: 'off',
+            message: 'Maintenance',
+            endsAt: null,
+            infoUrl: null,
+            retryAfterSeconds: 3600,
+          });
+        }
+
         if (url.includes('/api/auth/get-session')) {
           return new Response(JSON.stringify(null), {
             headers: {

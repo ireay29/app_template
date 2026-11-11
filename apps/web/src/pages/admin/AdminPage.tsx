@@ -1,14 +1,23 @@
 import Chip from '@mui/material/Chip';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorState, LoadingState } from '@/components/ui/feedback-state';
+import { getProtectedQueryScope, protectedQueryOptions } from '@/lib/api/protected-query';
 import { apiQuery } from '@/lib/api/query';
+import { authClient } from '@/lib/auth-client';
 import { getErrorMessage } from '@/lib/errors';
 
 export function AdminPage() {
-  const adminSummary = apiQuery.useQuery('get', '/api/admin/summary');
+  const session = authClient.useSession();
+  const adminSummary = useQuery(
+    protectedQueryOptions(
+      getProtectedQueryScope(session.data),
+      apiQuery.queryOptions('get', '/api/admin/summary'),
+    ),
+  );
 
   return (
     <main className="bg-background text-foreground min-h-screen">

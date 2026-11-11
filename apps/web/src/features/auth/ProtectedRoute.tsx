@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import type { PropsWithChildren } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -8,6 +9,7 @@ import {
   LoadingState,
   UnauthorizedState,
 } from '@/components/ui/feedback-state';
+import { getProtectedQueryScope, protectedQueryOptions } from '@/lib/api/protected-query';
 import { apiQuery } from '@/lib/api/query';
 import { authClient } from '@/lib/auth-client';
 import { getErrorMessage } from '@/lib/errors';
@@ -28,9 +30,13 @@ type ProtectedRouteProps = PropsWithChildren<{
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const session = authClient.useSession();
-  const currentUser = apiQuery.useQuery('get', '/api/me', undefined, {
-    enabled: Boolean(session.data?.user && requiredRole),
-  });
+  const currentUser = useQuery(
+    protectedQueryOptions(
+      getProtectedQueryScope(session.data),
+      apiQuery.queryOptions('get', '/api/me'),
+      Boolean(requiredRole),
+    ),
+  );
 
   if (session.isPending) {
     return (
@@ -86,7 +92,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     );
   }
 
-  if (requiredRole && currentUser.data?.user.role !== requiredRole) {
+  if (
+    requiredRole &&
+    (currentUser.data?.user.id !== session.data.user.id ||
+      currentUser.data.user.role !== requiredRole)
+  ) {
     return (
       <ProtectedRouteFrame>
         <ForbiddenState

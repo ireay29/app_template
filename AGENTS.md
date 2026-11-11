@@ -71,6 +71,7 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 
 - routing は React Router で標準化すること。
 - data fetching と cache は TanStack Query を標準とすること。
+- protected API の query は `apps/web/src/lib/api/protected-query.ts` の helper で user/session 単位に分離すること。認証切替時の cancel/remove は共通 boundary に任せ、前ユーザーの応答を新ユーザーの cache に書き込まないこと。
 - form と validation は React Hook Form + Zod を標準とすること。
 - 新規機能は `apps/web/src/features/<feature-name>` に置くこと。
 - feature 配下は、表示 component、state hook、feature 固有 helper を近くに置くこと。
@@ -98,7 +99,11 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 - Vercel、Docker、Kubernetes、AWS、Alibaba などの provider 固有処理を service、repository、route handler に漏らさないこと。
 - DB access を route handler や `app.ts` に直接書かないこと。
 - business logic は service、永続化は repository、response 変換は presenter に分けること。
-- protected endpoint は `sessionContext` を使い、未認証時は `401` を返すこと。
+- API endpoint は `RouteRegistrar` 経由で `public` / `authenticated` / `admin` を必ず宣言すること。
+- protected endpoint の認証・ロール確認は共通登録処理に任せ、handler は検証済みの `principal` を使うこと。未認証は `401`、権限不足は `403` を返すこと。
+- feature で raw Hono app に直接 route を追加したり、handler ごとに認証確認を再実装したりしないこと。未宣言 route は拒否し、公開は明示すること。
+- 認証前の middleware は共通境界内の固定処理に限定すること。追加の応答 middleware や cache はアクセス区分を明示する `RouteRegistrar.on` を使い、認証・認可より先に応答させないこと。
+- データ所有者の検証は service/repository でも行い、リクエストの userId を信頼しないこと。詳細は `docs/authorization.md` を参照すること。
 - API contract は Zod OpenAPI を source of truth とし、Web 側 client は OpenAPI 生成へ寄せること。
 - OpenAPI 生成は自前 generator を作らず、既存ライブラリを使うこと。
 - OpenAPI 生成の標準構成は `openapi-typescript`、`openapi-fetch`、`openapi-react-query` とすること。

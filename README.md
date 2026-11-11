@@ -97,6 +97,9 @@ pnpm db:reset
   auth cookies work through the local `/api/*` proxy.
 - Better Auth is mounted at `/api/auth/*`.
 - Protected API calls must include cookies with `credentials: "include"`.
+- API endpoints declare `public`, `authenticated`, or `admin` access through
+  the common route registrar. Undeclared routes are rejected. See
+  `docs/authorization.md` for registration and resource ownership rules.
 - Better Auth origin checks are enforced in production. Local development and
   tests disable the origin check because Vite proxy ports are intentionally
   configurable.
@@ -137,6 +140,7 @@ The web app proxies `/api/*` to the API server during local development.
 - Provider-neutral deployment contract: `docs/deployment-contract.md`
 - Vercel + Supabase verification guide: `docs/vercel-supabase.md`
 - Runtime adapter boundaries: `docs/runtime-adapters.md`
+- Maintenance modes, static 503 assets, and delivery runbook: `docs/maintenance.md`
 - Terraform scaffold and stack guide: `infra/terraform/README.md`
 - API container build: `Dockerfile.api`
 - Kubernetes examples: `deploy/k8s/example`

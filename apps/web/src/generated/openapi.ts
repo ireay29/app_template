@@ -72,6 +72,25 @@ export interface paths {
             };
           };
         };
+        /** @description Temporarily unavailable during maintenance. Retry-After indicates a retry delay. */
+        503: {
+          headers: {
+            /** @description Retry delay in seconds. */
+            'Retry-After'?: string;
+            /** @description no-store */
+            'Cache-Control'?: string;
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {string} */
+              error: 'Service Unavailable';
+              /** @enum {string} */
+              code: 'MAINTENANCE';
+              maintenance: components['schemas']['MaintenanceStatus'];
+            };
+          };
+        };
       };
     };
     put?: never;
@@ -143,6 +162,60 @@ export interface paths {
                */
               error: 'Forbidden';
             };
+          };
+        };
+        /** @description Temporarily unavailable during maintenance. Retry-After indicates a retry delay. */
+        503: {
+          headers: {
+            /** @description Retry delay in seconds. */
+            'Retry-After'?: string;
+            /** @description no-store */
+            'Cache-Control'?: string;
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {string} */
+              error: 'Service Unavailable';
+              /** @enum {string} */
+              code: 'MAINTENANCE';
+              maintenance: components['schemas']['MaintenanceStatus'];
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/maintenance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Public maintenance status. Available in all modes without a database query. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['MaintenanceStatus'];
           };
         };
       };
@@ -304,6 +377,25 @@ export interface paths {
             };
           };
         };
+        /** @description Temporarily unavailable during maintenance. Retry-After indicates a retry delay. */
+        503: {
+          headers: {
+            /** @description Retry delay in seconds. */
+            'Retry-After'?: string;
+            /** @description no-store */
+            'Cache-Control'?: string;
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {string} */
+              error: 'Service Unavailable';
+              /** @enum {string} */
+              code: 'MAINTENANCE';
+              maintenance: components['schemas']['MaintenanceStatus'];
+            };
+          };
+        };
       };
     };
     put?: never;
@@ -376,6 +468,25 @@ export interface paths {
             };
           };
         };
+        /** @description Temporarily unavailable during maintenance. Retry-After indicates a retry delay. */
+        503: {
+          headers: {
+            /** @description Retry delay in seconds. */
+            'Retry-After'?: string;
+            /** @description no-store */
+            'Cache-Control'?: string;
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {string} */
+              error: 'Service Unavailable';
+              /** @enum {string} */
+              code: 'MAINTENANCE';
+              maintenance: components['schemas']['MaintenanceStatus'];
+            };
+          };
+        };
       };
     };
     put?: never;
@@ -443,6 +554,25 @@ export interface paths {
             };
           };
         };
+        /** @description Temporarily unavailable during maintenance. Retry-After indicates a retry delay. */
+        503: {
+          headers: {
+            /** @description Retry delay in seconds. */
+            'Retry-After'?: string;
+            /** @description no-store */
+            'Cache-Control'?: string;
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {string} */
+              error: 'Service Unavailable';
+              /** @enum {string} */
+              code: 'MAINTENANCE';
+              maintenance: components['schemas']['MaintenanceStatus'];
+            };
+          };
+        };
       };
     };
     delete?: never;
@@ -454,7 +584,18 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: never;
+  schemas: {
+    MaintenanceStatus: {
+      /** @enum {string} */
+      mode: 'off' | 'read-only' | 'full';
+      message: string;
+      retryAfterSeconds: number;
+      /** Format: date-time */
+      endsAt: string | null;
+      /** Format: uri */
+      infoUrl: string | null;
+    };
+  };
   responses: never;
   parameters: never;
   requestBodies: never;

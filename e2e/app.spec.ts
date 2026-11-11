@@ -73,3 +73,28 @@ test('allows a seeded admin user to open the admin area', async ({ page }) => {
   await expect(page.getByText('Admin API access granted.')).toBeVisible();
   await expect(page.getByText('Role: admin')).toBeVisible();
 });
+
+test('does not reuse admin authorization after switching accounts within the SPA', async ({
+  page,
+}) => {
+  await signIn(page, 'admin@example.com');
+  // All transitions after initial load use links to preserve the QueryClient.
+  const documentId = await page.evaluate(() => {
+    const id = crypto.randomUUID();
+    document.documentElement.dataset.testDocumentId = id;
+    return id;
+  });
+  await page.getByRole('link', { name: 'Admin area' }).click();
+  await expect(page.getByText('Admin API access granted.')).toBeVisible();
+  await page.getByRole('link', { name: 'Back to dashboard' }).click();
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page.getByText('Signed out', { exact: true })).toBeVisible();
+  await page.getByLabel('Email').fill('member@example.com');
+  await page.getByLabel('Password').fill('password1234');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.getByText('member@example.com')).toBeVisible();
+  await page.getByRole('link', { name: 'Admin area' }).click();
+  await expect(page.getByRole('status')).toContainText('Admin access required');
+  await expect(page.getByText('Admin API access granted.')).not.toBeVisible();
+  expect(await page.locator('html').getAttribute('data-test-document-id')).toBe(documentId);
+});

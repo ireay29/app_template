@@ -26,6 +26,17 @@ be AWS, Alibaba Cloud, another container platform, or Kubernetes.
 - Runtime must handle `SIGINT` and `SIGTERM` and close the database pool.
 - The app must not run migrations or seed data during normal process startup.
 
+## Maintenance Contract
+
+The API supports `MAINTENANCE_MODE=off|read-only|full` and exposes public,
+uncached status at `GET /api/maintenance`. The guard stops restricted requests
+before session/handler execution. Health and database readiness remain usable.
+For Web HTTP 503, the platform must serve the supplied static maintenance HTML
+at original page URLs, preserve a normal robots.txt response, set Retry-After,
+and avoid caching maintenance responses. An API mode change alone does not
+change the HTTP status of statically hosted Web pages. See
+`docs/maintenance.md` for settings, delivery responsibilities, and the runbook.
+
 ## Environment Variables
 
 Required for production-like API runtime:
