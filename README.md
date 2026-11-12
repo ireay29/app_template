@@ -25,6 +25,7 @@ cp .env.example .env
 pnpm dev
 pnpm dev:supabase
 pnpm dev:vercel
+pnpm agent:static
 pnpm agent:quick
 pnpm agent:verify
 pnpm fix
@@ -65,10 +66,12 @@ pnpm check
 pnpm security:audit
 ```
 
-The DB-backed commands (`pnpm test`, `pnpm test:coverage`, `pnpm check`, and
-`pnpm ci`) expect PostgreSQL to be running and migrated. For local agent or
-human verification, prefer `pnpm agent:quick` or `pnpm agent:verify`; both start
-PostgreSQL, wait for readiness, and run migrations before checking the app.
+`pnpm agent:static` runs formatting, lint, and type checks without Docker.
+`pnpm agent:quick` runs these checks before preparing PostgreSQL and running
+the Vitest suites, including database-backed API tests. `pnpm agent:verify`
+prepares PostgreSQL and runs the full CI check suite. Standalone DB-backed
+commands such as `pnpm test`, `pnpm test:coverage`, `pnpm check`, and `pnpm ci`
+expect PostgreSQL to be running and migrated.
 
 `pnpm test:ui` opens the Web Vitest UI on port `51204`. Use
 `pnpm test:ui:api` for API tests on port `51205`; API tests require the local

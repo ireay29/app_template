@@ -2,16 +2,29 @@
 
 This template keeps a small set of predictable commands for coding agents and humans.
 
+## Static Checks
+
+```sh
+pnpm agent:static
+```
+
+Runs Prettier, ESLint, and TypeScript checks without starting Docker or
+PostgreSQL. Use it for early feedback while editing.
+
 ## Fast Loop
 
 ```sh
 pnpm agent:quick
 ```
 
-Starts PostgreSQL through Docker Compose, waits for readiness, runs migrations,
-then runs formatting check, ESLint, TypeScript, and unit tests. It does not
-seed demo data; use `pnpm db:seed` or `pnpm dev` when a browser flow needs the
-standard admin/member demo users.
+Runs `agent:static` first. After the checks pass, it starts PostgreSQL through
+Docker Compose, waits for readiness, runs migrations, and runs the Vitest
+suites, including database-backed API tests.
+For browser flows that need demo users, use `pnpm db:seed` or `pnpm dev`.
+
+`pnpm agent:review` runs `agent:quick`, the production build, and Playwright E2E.
+The [review procedure in AGENTS.md](../AGENTS.md#セルフレビュー) describes how
+to request a subagent review.
 
 ## Full Verification
 
@@ -21,8 +34,9 @@ pnpm agent:verify
 
 Starts PostgreSQL through Docker Compose, waits for readiness, runs migrations,
 then runs the same checks used by CI, including coverage, production build, and
-Playwright E2E. The Playwright server command seeds local demo data before
-browser tests.
+Playwright E2E. When Playwright starts a new server locally, `pnpm dev` seeds
+demo data. If it reuses a running server, the database must already contain
+that data. In CI the workflow seeds the database before Playwright starts.
 
 ## Vercel and Supabase
 
@@ -102,5 +116,8 @@ Removes build, coverage, and Playwright output directories.
 
 ```sh
 pnpm agent:status
-pnpm agent:verify
 ```
+
+Follow the [review procedure in AGENTS.md](../AGENTS.md#セルフレビュー) for the
+required checks and subagent review. For application changes, `pnpm agent:verify`
+includes the Playwright E2E run.

@@ -11,6 +11,7 @@ Agent は、既存の設計・品質ゲート・ディレクトリ境界を保�
 - 常に日本語で返答すること。
 - Python コマンドでファイル検証をしないこと。
 - 推測と事実を分けて説明すること。
+- 実装、ファイルの作成・編集を始める前にユーザーの確認を取ること。調査や読み取りは確認なしで進めてよい。
 - 仕様や設計を確定するまでは修正を始めないこと。
 - 既存の未コミット差分を勝手に戻さないこと。
 - 仕様に関係ないリファクタリングや依存追加を混ぜないこと。
@@ -38,6 +39,7 @@ Agent は、既存の設計・品質ゲート・ディレクトリ境界を保�
 
 ```sh
 pnpm dev
+pnpm agent:static
 pnpm agent:quick
 pnpm agent:verify
 pnpm fix
@@ -49,6 +51,7 @@ pnpm dev:vercel
 
 ## 検証コマンド
 
+- `pnpm agent:static`: Docker や DB を起動せず、Prettier・ESLint・TypeScript を検査
 - `pnpm format:check`: Prettier check
 - `pnpm lint`: ESLint
 - `pnpm typecheck`: TypeScript
@@ -65,7 +68,7 @@ pnpm dev:vercel
 - `pnpm check`: full local verification
 - `pnpm ci`: CI entrypoint
 
-DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` または `pnpm agent:verify` を優先してください。
+開発中は `pnpm agent:static` で静的チェックを先に実行します。テストに PostgreSQL が必要な場合は `pnpm agent:quick` を使います。完了時の検証は「セルフレビュー」に従います。各コマンドの詳細は [Agent Commands](docs/agent-commands.md) を参照してください。
 
 ## Web 方針
 
@@ -156,7 +159,7 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 
 - Prettier と ESLint の設定に従うこと。
 - import/export の並び順は ESLint の simple-import-sort に従うこと。
-- commit 前 hook は lint-staged で staged files に `eslint --fix` と `prettier --write` を走らせる。
+- commit 前 hook は lint-staged で staged の JS / TS 系ファイルに `eslint --fix` と `prettier --write` を実行する。対象の CSS・JSON・Markdown・YAML 系ファイルには `prettier --write` を実行する。
 - 依存追加は必要性を説明し、既存の stack と重複しないか確認すること。
 - lock file は必ず commit 対象に含めること。
 
@@ -178,16 +181,17 @@ DB を使う検証は PostgreSQL が必要です。通常は `pnpm agent:quick` 
 6. TanStack Query hook、React Hook Form + Zod form、presentational component を追加する。
 7. loading、empty、error、unauthorized state を共通 UI で実装する。
 8. unit test と必要な E2E を追加する。
-9. `pnpm agent:quick` を通し、完了前に `pnpm agent:verify` を通す。
+9. 「セルフレビュー」の手順に従い、変更に応じた検証とレビューを完了する。
 
 ## セルフレビュー
 
-1. `pnpm agent:status` で変更範囲を確認する。
-2. 仕様に関係ない差分が混ざっていないか確認する。
-3. 500行以上のファイルがないか確認し、ある場合は分割する。
-4. `pnpm agent:quick` を通す。
-5. UIやAPIの挙動が変わる場合は `pnpm test:e2e` も通す。
-6. 完了前に `pnpm agent:verify` を通す。
+1. `pnpm agent:status` で変更範囲を確認する。仕様外の差分と、変更対象のファイルが「行数管理」に沿っているかを確認する。
+2. 文書や開発ハーネスの変更は `pnpm agent:static` と、変更したコマンド・手順の確認を行う。アプリ実装の完了前には `pnpm agent:verify` を通す。このコマンドで静的チェックも実行される。UI や API の挙動変更で必須の Playwright E2E も、このコマンド内で通ればよい。
+3. 完了前に必ずサブエージェントへ読み取り専用のレビューを依頼する。依頼には変更の目的・対象差分・該当する Skill のパスを添える。フロントエンドは [frontend-review](skills/frontend-review/SKILL.md)、バックエンドは [backend-review](skills/backend-review/SKILL.md) を読み込ませる。両方に関わる差分は同じ回で両方の観点を確認する。その他の差分も、このファイルと該当する仕様を基準にレビューを依頼する。
+4. レビューは初回を含めて最大3回とする。実装担当は指摘のうち P3 以上（P0・P1・P2・P3）をすべて自分で修正し、影響する検証を再実行する。修正後は残り回数の範囲で再レビューを依頼する。要修正の指摘がなくなれば、その時点でレビューを終える。3回目の指摘も自分で修正して検証する。修正できない指摘が残った場合やサブエージェントのレビューを実施できない場合は、完了扱いにせず理由を報告する。
+5. 最終報告にレビュー回数、指摘への対応、実施した検証の結果を書く。未実施の検証があれば理由も書く。
+
+レビューの優先度は P0（リリースを止める致命的な不具合）、P1（主要な機能や利用者への重大な影響）、P2（具体的な条件で起こる不具合や設計上の回帰）、P3（影響は小さいが修正すべき不具合や明確な規約違反）とする。任意の提案は区別する。指摘にはファイルと行、根拠、発生条件または影響を添える。
 
 ## 採用済み方針
 

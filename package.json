@@ -57,7 +57,8 @@
     "vercel:check": "sh ./scripts/vercel-check.sh",
     "fix": "pnpm format && pnpm lint:fix",
     "clean": "rimraf coverage test-results playwright-report apps/*/dist apps/*/coverage apps/*/test-results apps/*/playwright-report",
-    "agent:quick": "pnpm db:up && pnpm db:wait && pnpm db:migrate && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "agent:static": "pnpm format:check && pnpm lint && pnpm typecheck",
+    "agent:quick": "pnpm agent:static && pnpm db:up && pnpm db:wait && pnpm db:migrate && pnpm test",
     "agent:verify": "pnpm db:up && pnpm db:wait && pnpm db:migrate && pnpm check",
     "agent:review": "pnpm agent:quick && pnpm build && pnpm test:e2e",
     "agent:status": "git status --short --branch"

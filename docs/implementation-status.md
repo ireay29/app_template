@@ -135,16 +135,13 @@ Drizzle migration commands when present.
 
 ## Verification
 
-For normal local review, run:
+Choose a command for the work at hand:
 
-```sh
-pnpm agent:quick
-pnpm agent:verify
-```
-
-`agent:quick` starts PostgreSQL, waits for readiness, runs migrations, then
-checks format, lint, types, and tests. `agent:verify` runs the full local CI
-path, including coverage, production builds, and Playwright E2E.
+- `pnpm agent:static` runs format, lint, and type checks without Docker.
+- `pnpm agent:quick` runs those checks before preparing PostgreSQL and running
+  the Vitest suites, including database-backed API tests.
+- `pnpm agent:verify` runs the full local CI path before finishing application
+  changes, including coverage, production builds, and Playwright E2E.
 
 For interactive unit test review, run:
 
