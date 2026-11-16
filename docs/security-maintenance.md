@@ -26,13 +26,13 @@ constraints allow patched versions without overrides.
 
 ## Runtime updates
 
-The October 21, 2026 Node.js security release establishes these minimums:
+The November 11, 2026 Node.js security release establishes these minimums:
 
 | Major | Minimum |
 | ----- | ------- |
-| 22    | 22.23.4 |
-| 24    | 24.22.1 |
-| 26    | 26.12.1 |
+| 22    | 22.23.5 |
+| 24    | 24.22.3 |
+| 26    | 26.13.1 |
 
 `package.json` and `engineStrict` reject older releases. `.node-version` and
 `Dockerfile.api` select the Node 22 baseline; Dependabot tracks Docker updates.
@@ -72,7 +72,12 @@ package alone does not remove stolen credentials or host persistence.
 
 ## References
 
-- [Node.js October 2026 security release](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)
+- [Node.js November 2026 security release](https://nodejs.org/en/blog/vulnerability/november-2026-security-releases/)
+- [Hono 4.13.16 security fixes](https://github.com/honojs/hono/releases/tag/v4.13.16)
+- [Hono 4.13.18 security fixes](https://github.com/honojs/hono/releases/tag/v4.13.18)
+- [Hono Node server 2.1.6 security fixes](https://github.com/honojs/node-server/releases/tag/v2.1.6)
+- [Hono Node server 2.1.7 security fix](https://github.com/honojs/node-server/releases/tag/v2.1.7)
+- [Vite development server code execution](https://github.com/vitejs/vite/security/advisories/GHSA-p4f5-76q4-ffq7)
 - [Hono CORS DoS](https://github.com/honojs/hono/security/advisories/GHSA-8j4g-w8fx-2239)
 - [Vite filesystem access control](https://github.com/vitejs/vite/security/advisories/GHSA-rq7h-c2jc-7f22)
 - [Better Auth OAuth/Magic Link isolation](https://github.com/better-auth/better-auth/security/advisories/GHSA-965c-763c-88jm)
