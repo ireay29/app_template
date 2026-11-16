@@ -182,10 +182,14 @@ pnpm terraform:check
 
 ## CI
 
-GitHub Actions runs `pnpm ci` on Node.js 22.x and 24.x. The CI job starts a
-PostgreSQL service, migrates and seeds the database, installs Playwright
-Chromium, and runs the full local check.
+GitHub Actions runs `pnpm ci` on Node.js 22.x and 24.x for human-authored pull
+requests and pushes to `main`. The CI job starts a PostgreSQL service, migrates
+and seeds the database, installs Playwright Chromium, and runs the full local
+check.
 
-Dependency auditing also runs daily and on pull requests without installing
-dependencies. Dependabot opens weekly updates for npm, GitHub Actions, and
-Docker. See `docs/security-maintenance.md` for update and deployment checks.
+The dependency audit runs without installing packages on the same events,
+daily, and when triggered manually. Both jobs are skipped for pull requests
+whose author GitHub identifies as a bot, including Dependabot.
+
+Dependabot opens weekly updates for npm, GitHub Actions, and Docker. See
+`docs/security-maintenance.md` for update and deployment checks.
