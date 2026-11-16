@@ -14,7 +14,7 @@ A TypeScript app template with a Vite React frontend and a Hono API backend.
 
 ## Commands
 
-Use a patched Node.js release: 22.23.4+, 24.22.1+, or 26.12.1+ within those
+Use a patched Node.js release: 22.23.5+, 24.22.3+, or 26.13.1+ within those
 major release lines. `.node-version` selects the Node 22 baseline, and pnpm
 rejects unsupported engines.
 
