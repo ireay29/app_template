@@ -34,7 +34,7 @@
     "build": "node --version && pnpm --recursive --if-present build",
     "security:audit": "pnpm audit --audit-level=low",
     "typecheck": "pnpm --recursive --if-present typecheck",
-    "lint": "eslint .",
+    "lint": "eslint . && node --test scripts/lint/architecture-rules.test.mjs",
     "lint:fix": "eslint . --fix",
     "test": "pnpm --workspace-concurrency=1 --recursive --if-present test",
     "test:coverage": "pnpm --workspace-concurrency=1 --recursive --if-present test:coverage",
@@ -59,6 +59,9 @@
     "clean": "rimraf coverage test-results playwright-report apps/*/dist apps/*/coverage apps/*/test-results apps/*/playwright-report",
     "agent:static": "pnpm format:check && pnpm lint && pnpm typecheck",
     "agent:quick": "pnpm agent:static && pnpm db:up && pnpm db:wait && pnpm db:migrate && pnpm test",
+    "agent:evidence": "cross-env E2E_EVIDENCE=1 pnpm test:e2e",
+    "verify:tla": "sh ./scripts/verification/tla.sh",
+    "verify:lean": "sh ./scripts/verification/lean.sh",
     "agent:verify": "pnpm db:up && pnpm db:wait && pnpm db:migrate && pnpm check",
     "agent:review": "pnpm agent:quick && pnpm build && pnpm test:e2e",
     "agent:status": "git status --short --branch"

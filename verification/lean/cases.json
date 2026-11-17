@@ -1,0 +1,8 @@
+[
+  { "subtotal": 0, "discount": 0, "expected": 0 },
+  { "subtotal": 1250, "discount": 0, "expected": 1250 },
+  { "subtotal": 1250, "discount": 499, "expected": 751 },
+  { "subtotal": 1250, "discount": 1250, "expected": 0 },
+  { "subtotal": 1250, "discount": 2000, "expected": 0 },
+  { "subtotal": 9007199254740991, "discount": 1, "expected": 9007199254740990 }
+]

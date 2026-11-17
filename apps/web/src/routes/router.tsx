@@ -6,8 +6,6 @@ import { HomePage } from '@/pages/home/HomePage';
 
 import { defineRoute } from './route-definition';
 
-// The lazy route page is intentionally colocated with router configuration.
-// eslint-disable-next-line react-refresh/only-export-components
 const AdminPage = lazy(() =>
   import('@/pages/admin/AdminPage').then((module) => ({ default: module.AdminPage })),
 );

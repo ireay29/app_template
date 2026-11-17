@@ -90,8 +90,6 @@ export function useAuthNotesDemo() {
         title: values.title.trim(),
       }),
     onSuccess: async () => {
-      // Refetch instead of inserting a response that may belong to the session
-      // which started the mutation before an account switch.
       await queryClient.invalidateQueries({ queryKey: currentNotesQueryKey });
       noteForm.reset({ body: '', title: '' });
     },

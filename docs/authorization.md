@@ -28,6 +28,8 @@ The common authorization middleware runs before OpenAPI request validation and
 the handler. Protected handlers receive a non-null `principal` with the verified
 session and current role. An `admin` handler's role is typed as `admin`.
 Authentication and role lookup failures do not execute the handler.
+The registrar preserves the route's request and response types while the
+middleware establishes the verified principal before the handler runs.
 
 The registrar derives OpenAPI 401/403 responses and the `x-access` extension
 from the same access declaration. Do not duplicate these responses or role
@@ -96,7 +98,12 @@ Web protected queries use keys scoped to both user ID and session ID. The shared
 `ProtectedQueryBoundary` cancels and removes queries from previous identities;
 sign-in, sign-up, and sign-out also discard protected queries before refetching
 the session. Use `protectedQueryOptions` with generated query options for new
-protected API queries. `/api/me` must match the current session's user ID before
+protected API queries. The generated query function receives its original key
+to read its method, path, and request options. Cancel and remove old queries
+together so a late response cannot repopulate the old cache entry. After a note
+mutation, invalidate the scoped list so the cache reads fresh data. The
+mutation response may belong to the session that initiated it.
+`/api/me` must match the current session's user ID before
 its role can allow a protected page. These client checks complement server-side
 authorization and do not replace it.
 

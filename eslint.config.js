@@ -6,6 +6,16 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+import { architecture } from './scripts/lint/architecture-rules.mjs';
+
+const nonImplementation = ['**/*.{test,spec}.{ts,tsx}', '**/{__tests__,test,generated}/**'];
+const eventOrQuery =
+  'Use an event handler, derived state, or TanStack Query. Put shared external synchronization in a provider.';
+const reactEffects = ['useEffect', 'useLayoutEffect', 'useInsertionEffect'];
+const timerNames = 'setTimeout|setInterval|requestAnimationFrame|requestIdleCallback';
+const browserGlobal = '/^(window|globalThis|self)$/';
+const timerProperty = `ObjectPattern > Property:matches([key.name=/^(${timerNames})$/], [key.value=/^(${timerNames})$/])`;
+
 export default tseslint.config(
   {
     ignores: ['**/coverage/**', '**/dist/**', '**/node_modules/**', '**/*wsl.localhost*/**'],
@@ -62,6 +72,69 @@ export default tseslint.config(
         ...globals.node,
       },
     },
+  },
+  {
+    files: ['apps/{web,api}/src/**/*.{ts,tsx}', 'api/**/*.ts'],
+    ignores: nonImplementation,
+    linterOptions: { noInlineConfig: true },
+    plugins: { architecture },
+    rules: {
+      'architecture/no-cross-app-imports': 'error',
+      'architecture/no-implementation-comments': 'error',
+    },
+  },
+  {
+    files: ['apps/web/src/{features,pages,components}/**/*.{ts,tsx}'],
+    ignores: nonImplementation,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react',
+              importNames: ['default', ...reactEffects],
+              allowTypeImports: true,
+              message: eventOrQuery,
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'ImportExpression[source.value="react"], ImportExpression > TemplateLiteral > TemplateElement[value.cooked="react"]',
+          message: eventOrQuery,
+        },
+        {
+          selector: `VariableDeclarator[init.name=${browserGlobal}] > ${timerProperty}, AssignmentExpression[right.name=${browserGlobal}] > ${timerProperty}`,
+          message: eventOrQuery,
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          checkGlobalObject: true,
+          globals: [
+            { name: 'setTimeout', message: eventOrQuery },
+            { name: 'setInterval', message: 'Use TanStack Query refetchInterval for polling.' },
+            {
+              name: 'requestAnimationFrame',
+              message: 'Use CSS transitions or the shared animation component.',
+            },
+            {
+              name: 'requestIdleCallback',
+              message: 'Use React lazy loading or an existing shared scheduling boundary.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['apps/web/src/routes/router.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
   eslintConfigPrettier,
 );

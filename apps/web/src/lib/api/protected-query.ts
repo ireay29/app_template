@@ -23,8 +23,6 @@ export function discardProtectedQueries(queryClient: QueryClient, keepScope: str
     predicate: (query: { queryKey: QueryKey }) =>
       keepScope === null || query.queryKey[1] !== keepScope,
   };
-  // Cancellation starts synchronously; removal also destroys the query so a late
-  // response cannot recreate the old identity's cache entry.
   void queryClient.cancelQueries(filters);
   queryClient.removeQueries(filters);
 }
@@ -37,7 +35,6 @@ export function protectedQueryOptions<TData, TKey extends QueryKey>(
   return {
     enabled: scope !== null && enabled,
     queryKey: getProtectedQueryKey(scope, options.queryKey),
-    // The generated query function reads method/path/init from its original key.
     queryFn: (context: QueryFunctionContext) =>
       options.queryFn({ ...context, queryKey: options.queryKey }),
   };

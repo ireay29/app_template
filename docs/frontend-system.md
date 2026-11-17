@@ -34,7 +34,7 @@ radius, border, input, and ring tokens.
   `Slot`, and `cn`.
 - `Card`: basic card composition with header, title, description, and content
   slots.
-- `FeedbackState`: shared loading, empty, error, and unauthorized states.
+- `FeedbackState`: shared loading, empty, error, forbidden, and unauthorized states.
 - `FormField`: shared label, input, textarea, and validation message styling.
 - `Dialog`: Radix-backed modal primitives for focused workflows.
 - `Toast`: Radix-backed provider and hook for transient app feedback.
@@ -74,11 +74,12 @@ variables and the MUI theme so mixed screens remain visually consistent.
 3. If it is feature-specific, keep it under the owning feature folder.
 4. Add a focused component test when the component has meaningful behavior,
    state, or accessibility expectations.
-5. Run `pnpm agent:quick` before handing off.
+5. Use `pnpm agent:static` for quick feedback and follow
+   [AGENTS.md](../AGENTS.md#セルフレビュー) for completion checks.
 
 ## Current Demo Coverage
 
-`apps/web/src/App.tsx` intentionally renders both systems:
+`HomePage` loads the `DesignSystemCard`, which demonstrates both systems:
 
 - shadcn/ui-compatible `Button` and `Card`.
 - MUI `Chip`, `Button`, and icon usage.

@@ -23,7 +23,6 @@ type App = OpenAPIHono<AppEnv>;
 type RegisteredAccess = RouteAccess | 'infrastructure';
 const registryEntries = new WeakMap<App, Map<RouterRoute, RegisteredAccess>>();
 
-/** Read-only inventory, including adapters absent from the OpenAPI document. */
 export function getRouteAccessManifest(app: App) {
   const entries = registryEntries.get(app);
   if (!entries) throw new Error('The app has no route registry.');
@@ -44,7 +43,6 @@ type BoundaryConfig = {
   maintenance: MaintenanceSettings;
 };
 
-/** Construct before any middleware or handlers so nothing is implicitly trusted. */
 export function createRouteRegistry(
   app: App,
   dependencies: AppDependencies,
@@ -69,13 +67,10 @@ export function createRouteRegistry(
       if (!access) return c.json(forbiddenBody, 403);
       if (access !== 'infrastructure') accesses.add(access);
     }
-    // A public wildcard must never shadow a more restrictive route.
     if (accesses.size > 1) return c.json(forbiddenBody, 403);
     return next();
   });
 
-  // This closed list is the only code allowed to respond before authorization.
-  // Do not accept callbacks or expose a generic pre-authorization middleware API.
   capture('infrastructure', () => {
     app.use('*', declaredRoutesOnly);
     app.use('*', timing());
@@ -108,8 +103,6 @@ export function createRouteRegistry(
         middleware: [authorize(access, dependencies)],
       };
       capture(access, () => {
-        // The preceding middleware establishes the handler's non-null principal.
-        // Keep the original route's request/response inference at this adapter boundary.
         app.openapi(configured, handler as unknown as RouteHandler<RouteConfig, AppEnv>);
       });
     },

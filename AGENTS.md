@@ -65,6 +65,9 @@ pnpm dev:vercel
 - `pnpm vercel:check`: Vercel support check
 - `pnpm container:smoke`: API container smoke test
 - `pnpm test:e2e`: Playwright
+- `pnpm agent:evidence --grep @account-switch`: 指定した E2E の成功時も画面・動画・トレースを保存
+- `pnpm verify:tla`: TLC でセッション切替の状態モデルを検査
+- `pnpm verify:lean`: Lean で金額計算の証明を検査し、TypeScript と共通ケースを照合
 - `pnpm check`: full local verification
 - `pnpm ci`: CI entrypoint
 
@@ -150,6 +153,7 @@ pnpm dev:vercel
 
 ## Test 方針
 
+- 並行処理、再試行、セッション切替などイベントの順序に依存する変更や、金額計算・配分など不変条件を持つ純粋なビジネスルールの変更では [formal-verification Skill](skills/formal-verification/SKILL.md) を読み、該当する性質を TLA+ または Lean で検証する。反例や証明の前提は実装テストに反映する。
 - service、repository、API contract、重要な UI state は Vitest で検証すること。
 - 認証、主要 CRUD、画面遷移、重要な回帰は Playwright E2E で検証すること。
 - UI や API の挙動を変えた場合は `pnpm test:e2e` も通すこと。
@@ -159,6 +163,10 @@ pnpm dev:vercel
 
 - Prettier と ESLint の設定に従うこと。
 - import/export の並び順は ESLint の simple-import-sort に従うこと。
+- 実装の Web / API 間の直接 import は ESLint で拒否する。契約は API の OpenAPI から生成し、Web は生成クライアントを使う。
+- Web の `features`、`pages`、`components` では React の effect と命令的なブラウザータイマーを使わない。イベント、派生状態、TanStack Query で表す。共有の外部同期は provider に置く。
+- `apps/web/src`、`apps/api/src`、`api` の実装コードにコメントを置かない。挙動は名前・型・テストで示す。設計の根拠は関連する文書へ、Lint の例外は設定へ置く。テスト、テスト用ファイル、生成物は対象外とする。
+- 繰り返される指摘は、まず API や型で誤りを表現できなくする方法を検討する。静的に判定できる場合は Lint にし、修正先を診断に示す。実行時の挙動は既存のテストで検証する。
 - commit 前 hook は lint-staged で staged の JS / TS 系ファイルに `eslint --fix` と `prettier --write` を実行する。対象の CSS・JSON・Markdown・YAML 系ファイルには `prettier --write` を実行する。
 - 依存追加は必要性を説明し、既存の stack と重複しないか確認すること。
 - lock file は必ず commit 対象に含めること。

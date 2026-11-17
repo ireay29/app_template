@@ -11,6 +11,14 @@ pnpm agent:static
 Runs Prettier, ESLint, and TypeScript checks without starting Docker or
 PostgreSQL. Use it for early feedback while editing.
 
+ESLint includes checks for Web/API imports, comments in application
+implementation files, and effects and timers in product UI. The lint command
+also exercises the rules on allowed and rejected examples.
+
+Use literal imports within application code so the linter can resolve
+their destination. List modules individually when Vite glob imports or
+direct filesystem imports would hide that boundary.
+
 ## Fast Loop
 
 ```sh
@@ -103,6 +111,39 @@ pnpm test:ui:api
 
 Opens Vitest UI for the Web package on port `51204` or API package on port
 `51205`. The API UI expects PostgreSQL to be running and migrated.
+
+## Browser Evidence
+
+Choose the test tag for the behavior in the
+[Feature Map](implementation-status.md#feature-map):
+
+```sh
+pnpm test:e2e --grep @account-switch
+pnpm agent:evidence --grep @account-switch
+```
+
+The regular run retains screenshots, videos, and traces from failed attempts,
+including a local failure with no retry. The evidence command also records
+successful attempts and builds a report. Open it with
+`pnpm exec playwright show-report`.
+
+Account switching and maintenance tests write `observed-states.mmd` under
+`test-results/` and attach it to the HTML report when one is generated. The
+statechart records each state after its assertions pass, so a failed test
+shows the states it actually reached. Use the trace to inspect DOM, network
+activity, and the failure. The CI jobs upload their Playwright reports under
+`playwright-node-22.x` and `playwright-node-24.x` for seven days.
+
+## Formal Verification
+
+```sh
+pnpm verify:tla
+pnpm verify:lean
+```
+
+Run the relevant check when changing a modeled flow or business rule. See
+[Formal Verification](formal-verification.md) for tool setup, sample properties,
+and how to reproduce a counterexample in an application test.
 
 ## Cleanup
 

@@ -1,4 +1,6 @@
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+
+import { test } from './flow-evidence';
 
 async function signIn(page: Page, email: string) {
   await page.goto('/');
@@ -9,7 +11,7 @@ async function signIn(page: Page, email: string) {
   await expect(page.getByText(email)).toBeVisible();
 }
 
-test('loads the workspace dashboard and API status', async ({ page }) => {
+test('loads the workspace dashboard and API status', { tag: '@dashboard' }, async ({ page }) => {
   await page.goto('/');
 
   await expect(page.getByRole('heading', { name: /Vite React frontend/i })).toBeVisible();
@@ -19,7 +21,7 @@ test('loads the workspace dashboard and API status', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'API docs' })).toHaveAttribute('href', '/api/docs');
 });
 
-test('signs up, creates a note, and signs out', async ({ page }) => {
+test('signs up, creates a note, and signs out', { tag: '@notes' }, async ({ page }) => {
   const email = `e2e-${Date.now()}-${crypto.randomUUID()}@example.com`;
 
   await page.goto('/');
@@ -42,59 +44,77 @@ test('signs up, creates a note, and signs out', async ({ page }) => {
   await expect(page.getByText('Signed out', { exact: true })).toBeVisible();
 });
 
-test('requires authentication before opening the admin page', async ({ page }) => {
-  await page.goto('/admin');
+test(
+  'requires authentication before opening the admin page',
+  { tag: '@admin-access' },
+  async ({ page }) => {
+    await page.goto('/admin');
 
-  await expect(page.getByRole('status')).toContainText('Authentication required');
-  await expect(page.getByText('Sign in before opening this protected page.')).toBeVisible();
-});
+    await expect(page.getByRole('status')).toContainText('Authentication required');
+    await expect(page.getByText('Sign in before opening this protected page.')).toBeVisible();
+  },
+);
 
-test('prevents a seeded member user from opening the admin area', async ({ page }) => {
-  await signIn(page, 'member@example.com');
+test(
+  'prevents a seeded member user from opening the admin area',
+  { tag: '@admin-access' },
+  async ({ page }) => {
+    await signIn(page, 'member@example.com');
 
-  const response = await page.evaluate(async () => {
-    const result = await fetch('/api/admin/summary', { credentials: 'include' });
-    return { body: await result.json(), status: result.status };
-  });
+    const response = await page.evaluate(async () => {
+      const result = await fetch('/api/admin/summary', { credentials: 'include' });
+      return { body: await result.json(), status: result.status };
+    });
 
-  expect(response).toEqual({ body: { error: 'Forbidden' }, status: 403 });
+    expect(response).toEqual({ body: { error: 'Forbidden' }, status: 403 });
 
-  await page.goto('/admin');
-  await expect(page.getByRole('status')).toContainText('Admin access required');
-  await expect(page.getByText('Your account does not have access to this page.')).toBeVisible();
-});
+    await page.goto('/admin');
+    await expect(page.getByRole('status')).toContainText('Admin access required');
+    await expect(page.getByText('Your account does not have access to this page.')).toBeVisible();
+  },
+);
 
-test('allows a seeded admin user to open the admin area', async ({ page }) => {
-  await signIn(page, 'admin@example.com');
+test(
+  'allows a seeded admin user to open the admin area',
+  { tag: '@admin-access' },
+  async ({ page }) => {
+    await signIn(page, 'admin@example.com');
 
-  await page.goto('/admin');
+    await page.goto('/admin');
 
-  await expect(page.getByRole('heading', { name: 'Admin area' })).toBeVisible();
-  await expect(page.getByText('Admin API access granted.')).toBeVisible();
-  await expect(page.getByText('Role: admin')).toBeVisible();
-});
+    await expect(page.getByRole('heading', { name: 'Admin area' })).toBeVisible();
+    await expect(page.getByText('Admin API access granted.')).toBeVisible();
+    await expect(page.getByText('Role: admin')).toBeVisible();
+  },
+);
 
-test('does not reuse admin authorization after switching accounts within the SPA', async ({
-  page,
-}) => {
-  await signIn(page, 'admin@example.com');
-  // All transitions after initial load use links to preserve the QueryClient.
-  const documentId = await page.evaluate(() => {
-    const id = crypto.randomUUID();
-    document.documentElement.dataset.testDocumentId = id;
-    return id;
-  });
-  await page.getByRole('link', { name: 'Admin area' }).click();
-  await expect(page.getByText('Admin API access granted.')).toBeVisible();
-  await page.getByRole('link', { name: 'Back to dashboard' }).click();
-  await page.getByRole('button', { name: 'Sign out' }).click();
-  await expect(page.getByText('Signed out', { exact: true })).toBeVisible();
-  await page.getByLabel('Email').fill('member@example.com');
-  await page.getByLabel('Password').fill('password1234');
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByText('member@example.com')).toBeVisible();
-  await page.getByRole('link', { name: 'Admin area' }).click();
-  await expect(page.getByRole('status')).toContainText('Admin access required');
-  await expect(page.getByText('Admin API access granted.')).not.toBeVisible();
-  expect(await page.locator('html').getAttribute('data-test-document-id')).toBe(documentId);
-});
+test(
+  'does not reuse admin authorization after switching accounts within the SPA',
+  { tag: ['@admin-access', '@account-switch'] },
+  async ({ observeState, page }) => {
+    await signIn(page, 'admin@example.com');
+    // All transitions after initial load use links to preserve the QueryClient.
+    const documentId = await page.evaluate(() => {
+      const id = crypto.randomUUID();
+      document.documentElement.dataset.testDocumentId = id;
+      return id;
+    });
+    await page.getByRole('link', { name: 'Admin area' }).click();
+    await expect(page.getByText('Admin API access granted.')).toBeVisible();
+    observeState('Open Admin area as admin', 'Admin access granted');
+    await page.getByRole('link', { name: 'Back to dashboard' }).click();
+    await page.getByRole('button', { name: 'Sign out' }).click();
+    await expect(page.getByText('Signed out', { exact: true })).toBeVisible();
+    observeState('Sign out', 'Signed out');
+    await page.getByLabel('Email').fill('member@example.com');
+    await page.getByLabel('Password').fill('password1234');
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await expect(page.getByText('member@example.com')).toBeVisible();
+    observeState('Sign in as member', 'Member session active');
+    await page.getByRole('link', { name: 'Admin area' }).click();
+    await expect(page.getByRole('status')).toContainText('Admin access required');
+    await expect(page.getByText('Admin API access granted.')).not.toBeVisible();
+    expect(await page.locator('html').getAttribute('data-test-document-id')).toBe(documentId);
+    observeState('Open Admin area in the same SPA', 'Admin access required');
+  },
+);

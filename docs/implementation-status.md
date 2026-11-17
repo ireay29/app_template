@@ -27,6 +27,20 @@ quickly.
 
 ## Feature Map
 
+| User goal                  | Entry and controls                                             | Expected result                                                                         | Test tag          |
+| -------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ----------------- |
+| Check the dashboard        | Open `/` and check `API online` or open `API docs`             | Dashboard and design system examples load                                               | `@dashboard`      |
+| Create a note              | Use `Sign up` or `Sign in`, fill `Note title`, use `Save note` | The note appears for the signed-in user                                                 | `@notes`          |
+| Open the admin area        | Follow `Admin area` or open `/admin`                           | Signed-out and member users see a denial; admins have access                            | `@admin-access`   |
+| Switch accounts            | Use `Sign out`, then `Sign in` as a member from the dashboard  | Previous admin access is discarded within the same SPA                                  | `@account-switch` |
+| See maintenance and return | Open the dashboard or `/admin` during maintenance              | Read-only disables sign-in and sign-up; full hides the app; recovery re-enables sign-in | `@maintenance`    |
+
+Run a flow with `pnpm test:e2e --grep <tag>`. To record a successful run as well,
+use `pnpm agent:evidence --grep <tag>`. The account-switch and maintenance
+scenarios attach statecharts showing the states their assertions confirmed.
+
+### Implementation Map
+
 | Area                | Entry Point                                       | Notes                                                                                  |
 | ------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | Web shell           | `apps/web/src/App.tsx`                            | Wraps the router in the maintenance boundary and shows the demo app.                   |
