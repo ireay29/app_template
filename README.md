@@ -70,7 +70,7 @@ pnpm security:audit
 `pnpm agent:quick` runs these checks before preparing PostgreSQL and running
 the Vitest suites, including database-backed API tests. `pnpm agent:verify`
 prepares PostgreSQL and runs the full CI check suite. Standalone DB-backed
-commands such as `pnpm test`, `pnpm test:coverage`, `pnpm check`, and `pnpm ci`
+commands such as `pnpm test`, `pnpm test:coverage`, `pnpm check`, and `pnpm run ci`
 expect PostgreSQL to be running and migrated.
 
 `pnpm test:ui` opens the Web Vitest UI on port `51204`. Use
@@ -182,7 +182,7 @@ pnpm terraform:check
 
 ## CI
 
-GitHub Actions runs `pnpm ci` on Node.js 22.x and 24.x for human-authored pull
+GitHub Actions runs `pnpm run ci` on Node.js 22.x and 24.x for human-authored pull
 requests and pushes to `main`. The CI job starts a PostgreSQL service, migrates
 and seeds the database, installs Playwright Chromium, and runs the full local
 check.

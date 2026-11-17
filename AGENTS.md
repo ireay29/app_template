@@ -69,7 +69,7 @@ pnpm dev:vercel
 - `pnpm verify:tla`: TLC でセッション切替の状態モデルを検査
 - `pnpm verify:lean`: Lean で金額計算の証明を検査し、TypeScript と共通ケースを照合
 - `pnpm check`: full local verification
-- `pnpm ci`: CI entrypoint
+- `pnpm run ci`: CI entrypoint
 
 開発中は `pnpm agent:static` で静的チェックを先に実行します。テストに PostgreSQL が必要な場合は `pnpm agent:quick` を使います。完了時の検証は「セルフレビュー」に従います。各コマンドの詳細は [Agent Commands](docs/agent-commands.md) を参照してください。
 

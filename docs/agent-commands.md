@@ -85,7 +85,7 @@ pnpm terraform:check
 
 `terraform:check` is an independent gate. It runs wrapper tests, recursive
 format checking, and the sandbox `init -backend=false` / `validate` path. It is
-not included in `pnpm check` or `pnpm ci` until provider download and ordinary
+not included in `pnpm check` or `pnpm run ci` until provider download and ordinary
 CI integration are decided by a follow-up issue.
 
 The wrapper and `terraform:fmt` require the CLI version in

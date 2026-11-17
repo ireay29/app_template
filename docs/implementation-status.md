@@ -16,7 +16,7 @@ quickly.
 - Maintenance: `off`, `read-only`, and `full` modes with API enforcement, public
   status, shared Web notices, and static assets for delivery-layer HTTP 503.
 - `.github/workflows/ci.yml`: CI on Node.js 22.x and 24.x with PostgreSQL,
-  migrations, Playwright browser install, and `pnpm ci`.
+  migrations, Playwright browser install, and `pnpm run ci`.
 - `api/[...route].ts`: Vercel Functions entrypoint that reuses the Hono app.
 - `Dockerfile.api`: provider-neutral API container build with a separate
   migration target.

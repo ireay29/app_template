@@ -18,7 +18,13 @@ const timerProperty = `ObjectPattern > Property:matches([key.name=/^(${timerName
 
 export default tseslint.config(
   {
-    ignores: ['**/coverage/**', '**/dist/**', '**/node_modules/**', '**/*wsl.localhost*/**'],
+    ignores: [
+      '**/coverage/**',
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/playwright-report/**',
+      '**/*wsl.localhost*/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
