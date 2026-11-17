@@ -181,6 +181,8 @@ pnpm dev:vercel
 
 ## 新規 Feature の追加手順
 
+認証・認可、DB の互換性、複数画面にまたがる振る舞いなど、実装前に仕様判断が必要な変更では [設計レビュー Skill](skills/design-review/SKILL.md) を使う。具体例を添えた設計案を別のサブエージェントにレビューさせ、ユーザーに未決事項と実装範囲を確認する。
+
 1. 仕様、画面、API、DB 変更の有無を整理する。
 2. Web feature directory と API service/repository 境界を決める。
 3. DB が必要なら schema と migration を追加する。
